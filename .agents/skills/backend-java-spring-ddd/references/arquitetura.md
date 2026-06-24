@@ -323,9 +323,8 @@ infra/mappers/SpeciesJpaMapper.java
 infra/repositories/SpeciesRepositoryJpa.java
 ```
 
-JPA/Hibernate cria as tabelas no ambiente local conforme configuracao atual do
-projeto. Se migrations voltarem a ser adotadas, elas devem refletir o mesmo
-modelo, incluindo `TB_EVENTO`.
+JPA/Hibernate cria e evolui as tabelas conforme configuracao atual do projeto,
+usando `spring.jpa.hibernate.ddl-auto=update`. Nao exigir Flyway neste projeto.
 
 ## Testes Esperados Para EDD
 
