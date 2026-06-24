@@ -4,7 +4,7 @@ import br.com.pokeidle3d.domain.entities.Species;
 import br.com.pokeidle3d.domain.exceptions.SpeciesDuplicadaException;
 import br.com.pokeidle3d.domain.repositories.SpeciesRepository;
 import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
-import br.com.pokeidle3d.infra.persistence.SpringDataSpeciesJpaRepository;
+import br.com.pokeidle3d.infra.mappers.SpeciesJpaMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

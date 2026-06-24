@@ -1,58 +1,79 @@
-Arquitetura de Referência
+Arquitetura de Referencia
 
-Use este projeto como referência arquitetural, não como fonte para copiar código literalmente:
+Use este projeto como referencia arquitetural, nao como fonte para copiar codigo literalmente:
 
 https://github.com/camilarqf/sedoc
 
-## Como usar a referência
+O projeto de referencia e .NET/C#, portanto traduza os conceitos para Java/Spring Boot.
+
+## Como usar a referencia
 
 Observe principalmente:
 
-- organização de pacotes
-- separação entre api, application, domain e infra
-- fluxo Command/Query/Handler
-- uso de Value Objects
-- tratamento global de exceções
-- migrations
-- testes
+- separacao entre Api, Application, Domain e Infrastructure
+- use cases agrupados por caso de uso
+- endpoints/requests separados por recurso e caso de uso
+- dominio com aggregates, entities, value objects, repositories, events e exceptions
+- infraestrutura de dados com repositories, mappings e contexts separados
+- tratamento global de excecoes
+- testes separados por camada
 
-Não copie nomes, regras de negócio, credenciais, endpoints ou detalhes específicos do projeto de referência.
+Nao copie nomes, regras de negocio, credenciais, endpoints ou detalhes especificos do projeto de referencia.
 
-Se o projeto atual tiver padrões próprios, priorize o projeto atual.
+Se o projeto atual tiver padroes proprios, priorize o projeto atual e migre incrementalmente.
 
-O ponto importante: se a URL mudar, sair do ar, ficar privada ou o Codex estiver sem internet, a skill perde parte do
-valor. Por isso, o ideal é colocar no arquitetura.md um resumo dos padrões importantes além da URL.
+## Traducao Para Java
 
-Exemplo melhor:
+```text
+api
+├── controllers ou endpoints
+├── contracts
+├── handlers
+└── mappers
 
-## Estrutura Esperada
+application
+├── usecases
+│   └── nome-do-caso
+│       ├── Command ou Query
+│       └── Handler
+├── services
+└── events
 
-  ```text
-  api/controllers
-  api/dtos
-  application/commands
-  application/queries
-  application/handlers
-  domain/aggregates
-  domain/valueobjects
-  domain/events
-  domain/repositories
-  infra/persistence
-  infra/repositories
-  infra/messaging
+domain
+├── entities
+├── valueobjects
+├── events
+├── repositories
+└── exceptions
+
+infra
+├── persistence
+│   └── entidades/modelos JPA
+├── repositories
+│   ├── Spring Data repositories
+│   └── adapters concretos
+├── mappers
+├── messaging
+├── config
+└── integrations
 ```
-  ## Fluxo Command
 
-  Controller -> RequestDTO -> Command -> CommandHandler -> Aggregate -> Repository -> DomainEvent
+## Fluxo Command
 
-  ## Fluxo Query
+Controller/Endpoint -> Request contract -> Command -> Handler -> Domain -> Repository port -> Repository adapter -> JPA
 
-  Controller -> Query -> QueryHandler -> Repository/ReadModel -> ResponseDTO
+## Fluxo Query
 
-  ## Fluxo Event
+Controller/Endpoint -> Query -> Handler -> Repository port/read model -> Response contract
 
-  Aggregate registra evento -> Application coleta eventos -> PublicadorEventosDominio publica -> Infra entrega
+## Fluxo Event
 
-  ## Projeto de Referência
+Aggregate registra evento -> Application coleta eventos -> PublicadorEventosDominio publica -> Infra entrega
 
-https://github.com/camilarqf/sedoc
+## Regras Praticas
+
+- `api.contracts` substitui `api.dtos` neste projeto.
+- `infra.persistence` nao deve conter Spring Data repositories; use apenas para entidades/modelos JPA.
+- Spring Data repositories e adapters concretos ficam em `infra.repositories`.
+- Quando houver muitos use cases, preferir `application.usecases.<caso>` com Command/Query e Handler juntos.
+- Quando o dominio crescer, agrupar por contexto/recurso em vez de manter listas grandes em pacotes genericos.
