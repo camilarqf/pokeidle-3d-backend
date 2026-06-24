@@ -1,9 +1,9 @@
 package br.com.pokeidle3d.api.mappers;
 
-import br.com.pokeidle3d.api.dtos.CriarSpeciesRequest;
-import br.com.pokeidle3d.api.dtos.PaginaResponse;
-import br.com.pokeidle3d.api.dtos.SpeciesResponse;
-import br.com.pokeidle3d.application.commands.CriarSpeciesCommand;
+import br.com.pokeidle3d.api.contracts.CriarSpeciesRequest;
+import br.com.pokeidle3d.api.contracts.PaginaResponse;
+import br.com.pokeidle3d.api.contracts.SpeciesResponse;
+import br.com.pokeidle3d.application.usecases.criarspecies.CriarSpeciesCommand;
 import br.com.pokeidle3d.domain.entities.Species;
 import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
 import org.springframework.stereotype.Component;

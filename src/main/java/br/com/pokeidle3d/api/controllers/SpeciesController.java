@@ -1,16 +1,16 @@
 package br.com.pokeidle3d.api.controllers;
 
-import br.com.pokeidle3d.api.dtos.CriarSpeciesRequest;
-import br.com.pokeidle3d.api.dtos.PaginaResponse;
-import br.com.pokeidle3d.api.dtos.SpeciesResponse;
+import br.com.pokeidle3d.api.contracts.CriarSpeciesRequest;
+import br.com.pokeidle3d.api.contracts.PaginaResponse;
+import br.com.pokeidle3d.api.contracts.SpeciesResponse;
 import br.com.pokeidle3d.api.mappers.SpeciesApiMapper;
-import br.com.pokeidle3d.application.queries.BuscarSpeciesPorIdQuery;
-import br.com.pokeidle3d.application.queries.BuscarSpeciesPorPokedexNumberQuery;
-import br.com.pokeidle3d.application.queries.ListarSpeciesQuery;
-import br.com.pokeidle3d.application.usecases.BuscarSpeciesPorIdUseCase;
-import br.com.pokeidle3d.application.usecases.BuscarSpeciesPorPokedexNumberUseCase;
-import br.com.pokeidle3d.application.usecases.CriarSpeciesUseCase;
-import br.com.pokeidle3d.application.usecases.ListarSpeciesUseCase;
+import br.com.pokeidle3d.application.usecases.buscarspeciesporid.BuscarSpeciesPorIdQuery;
+import br.com.pokeidle3d.application.usecases.buscarspeciesporpokedexnumber.BuscarSpeciesPorPokedexNumberQuery;
+import br.com.pokeidle3d.application.usecases.listarspecies.ListarSpeciesQuery;
+import br.com.pokeidle3d.application.usecases.buscarspeciesporid.BuscarSpeciesPorIdUseCase;
+import br.com.pokeidle3d.application.usecases.buscarspeciesporpokedexnumber.BuscarSpeciesPorPokedexNumberUseCase;
+import br.com.pokeidle3d.application.usecases.criarspecies.CriarSpeciesUseCase;
+import br.com.pokeidle3d.application.usecases.listarspecies.ListarSpeciesUseCase;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
