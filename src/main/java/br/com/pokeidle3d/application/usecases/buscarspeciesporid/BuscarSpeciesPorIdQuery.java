@@ -1,4 +1,7 @@
 package br.com.pokeidle3d.application.usecases.buscarspeciesporid;
 
-public record BuscarSpeciesPorIdQuery(Long id) {
+import br.com.pokeidle3d.application.bus.Query;
+import br.com.pokeidle3d.domain.entities.Species;
+
+public record BuscarSpeciesPorIdQuery(Long id) implements Query<Species> {
 }

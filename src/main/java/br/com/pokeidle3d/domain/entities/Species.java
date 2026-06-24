@@ -1,12 +1,14 @@
 package br.com.pokeidle3d.domain.entities;
 
 import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.events.SpeciesCriadaEvent;
+import br.com.pokeidle3d.domain.valueobjects.CorrelationKey;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 
 import java.time.Instant;
 import java.util.Objects;
 
-public class Species {
+public class Species extends AggregateEventManager {
 
     private final Long id;
     private final Integer pokedexNumber;
@@ -73,7 +75,39 @@ public class Species {
             String spriteRef,
             String model3dRef
     ) {
-        return new Species(
+        return criar(
+                pokedexNumber,
+                name,
+                primaryType,
+                secondaryType,
+                baseHp,
+                baseAttack,
+                baseDefense,
+                baseSpecialAttack,
+                baseSpecialDefense,
+                baseSpeed,
+                spriteRef,
+                model3dRef,
+                CorrelationKey.gerar()
+        );
+    }
+
+    public static Species criar(
+            Integer pokedexNumber,
+            String name,
+            PokemonType primaryType,
+            PokemonType secondaryType,
+            Integer baseHp,
+            Integer baseAttack,
+            Integer baseDefense,
+            Integer baseSpecialAttack,
+            Integer baseSpecialDefense,
+            Integer baseSpeed,
+            String spriteRef,
+            String model3dRef,
+            CorrelationKey correlationKey
+    ) {
+        Species species = new Species(
                 null,
                 pokedexNumber,
                 name,
@@ -90,6 +124,14 @@ public class Species {
                 null,
                 null
         );
+        species.registrarEvento(SpeciesCriadaEvent.criar(
+                correlationKey,
+                species.getPokedexNumber(),
+                species.getName(),
+                species.getPrimaryType(),
+                species.getSecondaryType()
+        ));
+        return species;
     }
 
     public static Species restaurar(

@@ -9,6 +9,7 @@ public record ErroResponse(
         String error,
         String message,
         String path,
+        String correlationKey,
         List<String> details
 ) {
 }

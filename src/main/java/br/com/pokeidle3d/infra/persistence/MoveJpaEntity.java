@@ -12,18 +12,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
-@Getter
 @Entity
 @Table(name = "moves")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class MoveJpaEntity {
 
     @Id
@@ -56,6 +49,31 @@ public class MoveJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    protected MoveJpaEntity() {
+    }
+
+    public MoveJpaEntity(
+            Long id,
+            String name,
+            PokemonType type,
+            Integer power,
+            Integer accuracy,
+            MoveCategory category,
+            Integer pp,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.power = power;
+        this.accuracy = accuracy;
+        this.category = category;
+        this.pp = pp;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     @PrePersist
     void prePersist() {
         Instant agora = Instant.now();
@@ -66,5 +84,41 @@ public class MoveJpaEntity {
     @PreUpdate
     void preUpdate() {
         updatedAt = Instant.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public PokemonType getType() {
+        return type;
+    }
+
+    public Integer getPower() {
+        return power;
+    }
+
+    public Integer getAccuracy() {
+        return accuracy;
+    }
+
+    public MoveCategory getCategory() {
+        return category;
+    }
+
+    public Integer getPp() {
+        return pp;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 }

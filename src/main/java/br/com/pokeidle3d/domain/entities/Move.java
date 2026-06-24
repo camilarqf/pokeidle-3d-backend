@@ -7,7 +7,7 @@ import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import java.time.Instant;
 import java.util.Objects;
 
-public class Move {
+public class Move extends AggregateEventManager {
 
     private final Long id;
     private final String name;

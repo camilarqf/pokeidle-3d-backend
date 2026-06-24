@@ -180,6 +180,26 @@ public record CriarClienteCommand(
 
 ## Event Driven Domain
 
+No projeto `poke-idle-3d`, siga primeiro o desenho documentado em
+`references/arquitetura.md`. Ele descreve a base EDD atual do repositorio,
+incluindo `IAggregate`, `AggregateEventManager`, `DomainEvent`,
+`CorrelationKey`, `UnitOfWork`, `UnidadeTrabalhoEventosDominio`,
+`PublicadorEventosDominio`, `DomainNotification`, `StoreEventHandler`,
+`CommandBus`, `QueryBus`, `CorrelationKeyFilter` e o fluxo de publicacao apos
+persistencia.
+
+Use os nomes do `sedoc` quando forem conceitos arquiteturais centrais:
+
+* `AggregateEventManager` para aggregates que acumulam eventos
+* `IAggregate` para contrato de aggregates com eventos
+* `DomainEvent` para eventos concretos do dominio
+* `UnitOfWork` para publicacao apos persistencia
+* `DomainNotification` para persistencia no event store
+* `StoreEventHandler` para gravar a tabela `TB_EVENTO`
+
+`AggregateRoot` pode existir como alias/compatibilidade, mas o padrao novo no
+projeto e herdar de `AggregateEventManager`.
+
 Aggregates podem registrar Domain Events.
 
 Domain Events devem conter:
@@ -189,13 +209,20 @@ Domain Events devem conter:
 * CorrelationKey
 * dados mínimos necessários para o consumidor
 
-Eventos devem ser publicados a partir da camada application ou infra.
+Eventos devem ser publicados a partir de uma unidade de trabalho ou mecanismo
+equivalente da camada application/infra, apos a persistencia do aggregate.
 
 O domínio deve apenas registrar eventos, não publicar em mensageria diretamente.
 
 Criar abstrações como PublicadorEventosDominio quando necessário.
 
 Implementações de mensageria devem ficar em infra.messaging.
+
+Evite publicar eventos diretamente no Command Handler. O padrão preferido neste
+projeto e: Handler salva aggregate -> Repository registra aggregate salvo na
+UnidadeTrabalhoEventosDominio -> UnidadeTrabalhoEventosDominio publica apos
+commit -> PublicadorEventosDominio publica `DomainNotification` e evento
+concreto -> StoreEventHandler grava `TB_EVENTO` -> UnitOfWork limpa eventos.
 
 ## CorrelationKey
 

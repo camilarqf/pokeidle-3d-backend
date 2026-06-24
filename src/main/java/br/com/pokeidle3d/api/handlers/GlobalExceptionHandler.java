@@ -1,5 +1,6 @@
 package br.com.pokeidle3d.api.handlers;
 
+import br.com.pokeidle3d.api.context.CorrelationKeyContext;
 import br.com.pokeidle3d.api.contracts.ErroResponse;
 import br.com.pokeidle3d.domain.exceptions.MoveDuplicadoException;
 import br.com.pokeidle3d.domain.exceptions.MoveNaoEncontradoException;
@@ -16,12 +17,22 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    private final CorrelationKeyContext correlationKeyContext;
+
+    public GlobalExceptionHandler(CorrelationKeyContext correlationKeyContext) {
+        this.correlationKeyContext = correlationKeyContext;
+    }
 
     @ExceptionHandler({SpeciesNaoEncontradaException.class, MoveNaoEncontradoException.class})
     public ResponseEntity<ErroResponse> tratarNaoEncontrada(RuntimeException exception, HttpServletRequest request) {
@@ -69,12 +80,21 @@ public class GlobalExceptionHandler {
             HttpServletRequest request,
             List<String> detalhes
     ) {
+        String correlationKey = correlationKeyContext.atual().value();
+        LOGGER.warn(
+                "Erro tratado na API: status={}, path={}, correlationKey={}, mensagem={}",
+                status.value(),
+                request.getRequestURI(),
+                correlationKey,
+                mensagem
+        );
         ErroResponse response = new ErroResponse(
                 Instant.now(),
                 status.value(),
                 status.getReasonPhrase(),
                 mensagem,
                 request.getRequestURI(),
+                correlationKey,
                 detalhes
         );
         return ResponseEntity.status(status).body(response);

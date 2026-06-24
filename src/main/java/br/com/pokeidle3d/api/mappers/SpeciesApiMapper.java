@@ -5,13 +5,14 @@ import br.com.pokeidle3d.api.contracts.PaginaResponse;
 import br.com.pokeidle3d.api.contracts.SpeciesResponse;
 import br.com.pokeidle3d.application.usecases.criarspecies.CriarSpeciesCommand;
 import br.com.pokeidle3d.domain.entities.Species;
+import br.com.pokeidle3d.domain.valueobjects.CorrelationKey;
 import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SpeciesApiMapper {
 
-    public CriarSpeciesCommand paraCommand(CriarSpeciesRequest request) {
+    public CriarSpeciesCommand paraCommand(CriarSpeciesRequest request, CorrelationKey correlationKey) {
         return new CriarSpeciesCommand(
                 request.pokedexNumber(),
                 request.name(),
@@ -24,7 +25,8 @@ public class SpeciesApiMapper {
                 request.baseSpecialDefense(),
                 request.baseSpeed(),
                 request.spriteRef(),
-                request.model3dRef()
+                request.model3dRef(),
+                correlationKey
         );
     }
 

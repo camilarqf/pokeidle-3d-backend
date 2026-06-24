@@ -1,5 +1,6 @@
 package br.com.pokeidle3d.api.controllers;
 
+import br.com.pokeidle3d.infra.repositories.SpringDataEventJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +18,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,12 +33,17 @@ class SpeciesControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private SpringDataEventJpaRepository eventJpaRepository;
+
     @Test
     void deveCriarConsultarPorIdEConsultarPorPokedexNumber() throws Exception {
         MvcResult resultadoCriacao = mockMvc.perform(post("/api/especies")
+                        .header("X-Correlation-Key", "integration-test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payloadBulbasaur()))
                 .andExpect(status().isCreated())
+                .andExpect(header().string("X-Correlation-Key", "integration-test-key"))
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.pokedexNumber").value(1))
                 .andExpect(jsonPath("$.name").value("bulbasaur"))
@@ -45,6 +52,12 @@ class SpeciesControllerIntegrationTest {
         JsonNode body = objectMapper.readTree(resultadoCriacao.getResponse().getContentAsString());
         long id = body.get("id").asLong();
         assertThat(id).isPositive();
+        assertThat(eventJpaRepository.findAll())
+                .anySatisfy(evento -> {
+                    assertThat(evento.getFullName()).endsWith("SpeciesCriadaEvent");
+                    assertThat(evento.getAggregateType()).isEqualTo("Species");
+                    assertThat(evento.getPayload()).contains("integration-test-key");
+                });
 
         mockMvc.perform(get("/api/especies/{id}", id))
                 .andExpect(status().isOk())
@@ -111,8 +124,11 @@ class SpeciesControllerIntegrationTest {
 
     @Test
     void deveRetornarNaoEncontradoQuandoSpeciesNaoExiste() throws Exception {
-        mockMvc.perform(get("/api/especies/{id}", 99999))
+        mockMvc.perform(get("/api/especies/{id}", 99999)
+                        .header("X-Correlation-Key", "not-found-key"))
                 .andExpect(status().isNotFound())
+                .andExpect(header().string("X-Correlation-Key", "not-found-key"))
+                .andExpect(jsonPath("$.correlationKey").value("not-found-key"))
                 .andExpect(jsonPath("$.message").value("Especie nao encontrada"));
     }
 
