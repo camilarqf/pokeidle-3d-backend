@@ -21,7 +21,9 @@ Ao criar ou evoluir um projeto, use:
 - Jakarta Validation.
 - Spring Boot Actuator.
 - JUnit 5, Mockito e Spring Boot Test.
-- Flyway para migrations, salvo se o projeto já usar Liquibase.
+- Criação/evolução de tabelas pelo mecanismo já adotado no projeto. No
+  `poke-idle-3d`, usar JPA/Hibernate com `spring.jpa.hibernate.ddl-auto=update`
+  e não exigir Flyway.
 - MapStruct quando houver mapeamentos repetitivos entre DTOs, Commands, Queries, entidades e modelos de persistência.
 
 Antes de escolher versões, verificar documentação oficial ou o padrão já existente no repositório.
@@ -299,9 +301,11 @@ Configurar datasource por variáveis de ambiente.
 
 Não commitar credenciais.
 
-Usar migrations versionadas.
+No `poke-idle-3d`, não exigir Flyway. O padrão atual é deixar o JPA/Hibernate
+criar e evoluir as tabelas via `spring.jpa.hibernate.ddl-auto=update`.
 
-Preferir Flyway quando não houver padrão existente.
+Se outro projeto já usar migrations versionadas, seguir o padrão existente
+desse projeto.
 
 Manter entidades JPA e detalhes de persistência em `infra.persistence`.
 
@@ -400,7 +404,7 @@ Ao implementar uma funcionalidade:
 7. Implementar persistência em infra.
 8. Criar contracts, mappers e controllers/endpoints em api.
 9. Adicionar tratamento global de erro.
-10. Adicionar migrations.
+10. Ajustar persistência conforme o padrão do projeto.
 11. Adicionar testes.
 12. Rodar build e testes.
 

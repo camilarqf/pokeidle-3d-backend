@@ -3,11 +3,14 @@ package br.com.pokeidle3d.api.controllers;
 import br.com.pokeidle3d.api.contracts.CriarMoveRequest;
 import br.com.pokeidle3d.api.contracts.MoveResponse;
 import br.com.pokeidle3d.api.contracts.PaginaResponse;
+import br.com.pokeidle3d.api.contracts.SpeciesPorMoveResponse;
 import br.com.pokeidle3d.api.mappers.MoveApiMapper;
+import br.com.pokeidle3d.api.mappers.SpeciesMoveApiMapper;
 import br.com.pokeidle3d.application.bus.CommandBus;
 import br.com.pokeidle3d.application.bus.QueryBus;
 import br.com.pokeidle3d.application.usecases.buscarmoveporid.BuscarMovePorIdQuery;
 import br.com.pokeidle3d.application.usecases.buscarmoveporname.BuscarMovePorNameQuery;
+import br.com.pokeidle3d.application.usecases.listarspeciespormove.ListarSpeciesPorMoveQuery;
 import br.com.pokeidle3d.application.usecases.listarmovesporcategory.ListarMovesPorCategoryQuery;
 import br.com.pokeidle3d.application.usecases.listarmovesportype.ListarMovesPorTypeQuery;
 import br.com.pokeidle3d.application.usecases.listarmoves.ListarMovesQuery;
@@ -27,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Validated
 @RestController
 @RequestMapping("/api/moves")
@@ -35,15 +40,18 @@ public class MoveController {
     private final CommandBus commandBus;
     private final QueryBus queryBus;
     private final MoveApiMapper mapper;
+    private final SpeciesMoveApiMapper speciesMoveApiMapper;
 
     public MoveController(
             CommandBus commandBus,
             QueryBus queryBus,
-            MoveApiMapper mapper
+            MoveApiMapper mapper,
+            SpeciesMoveApiMapper speciesMoveApiMapper
     ) {
         this.commandBus = commandBus;
         this.queryBus = queryBus;
         this.mapper = mapper;
+        this.speciesMoveApiMapper = speciesMoveApiMapper;
     }
 
     @PostMapping
@@ -79,5 +87,15 @@ public class MoveController {
             return mapper.paraPaginaResponse(queryBus.dispatch(new ListarMovesPorCategoryQuery(category, pagina, tamanho)));
         }
         return mapper.paraPaginaResponse(queryBus.dispatch(new ListarMovesQuery(pagina, tamanho)));
+    }
+
+    @GetMapping("/{moveId}/species")
+    public List<SpeciesPorMoveResponse> listarSpeciesPorMove(@PathVariable @Min(1) Long moveId) {
+        return queryBus.<List<br.com.pokeidle3d.application.usecases.listarspeciespormove.SpeciesPorMoveItem>>dispatch(
+                        new ListarSpeciesPorMoveQuery(moveId)
+                )
+                .stream()
+                .map(speciesMoveApiMapper::paraSpeciesPorMoveResponse)
+                .toList();
     }
 }

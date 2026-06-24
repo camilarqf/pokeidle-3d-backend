@@ -5,6 +5,8 @@ import br.com.pokeidle3d.api.contracts.ErroResponse;
 import br.com.pokeidle3d.domain.exceptions.MoveDuplicadoException;
 import br.com.pokeidle3d.domain.exceptions.MoveNaoEncontradoException;
 import br.com.pokeidle3d.domain.exceptions.SpeciesDuplicadaException;
+import br.com.pokeidle3d.domain.exceptions.SpeciesMoveDuplicadoException;
+import br.com.pokeidle3d.domain.exceptions.SpeciesMoveNaoEncontradoException;
 import br.com.pokeidle3d.domain.exceptions.SpeciesNaoEncontradaException;
 import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,12 +36,12 @@ public class GlobalExceptionHandler {
         this.correlationKeyContext = correlationKeyContext;
     }
 
-    @ExceptionHandler({SpeciesNaoEncontradaException.class, MoveNaoEncontradoException.class})
+    @ExceptionHandler({SpeciesNaoEncontradaException.class, MoveNaoEncontradoException.class, SpeciesMoveNaoEncontradoException.class})
     public ResponseEntity<ErroResponse> tratarNaoEncontrada(RuntimeException exception, HttpServletRequest request) {
         return criarErro(HttpStatus.NOT_FOUND, exception.getMessage(), request, List.of());
     }
 
-    @ExceptionHandler({SpeciesDuplicadaException.class, MoveDuplicadoException.class})
+    @ExceptionHandler({SpeciesDuplicadaException.class, MoveDuplicadoException.class, SpeciesMoveDuplicadoException.class})
     public ResponseEntity<ErroResponse> tratarDuplicada(RuntimeException exception, HttpServletRequest request) {
         return criarErro(HttpStatus.CONFLICT, exception.getMessage(), request, List.of());
     }
