@@ -10,6 +10,8 @@ public interface SpringDataSpeciesJpaRepository extends JpaRepository<SpeciesJpa
 
     Optional<SpeciesJpaEntity> findByPokedexNumber(Integer pokedexNumber);
 
+    Optional<SpeciesJpaEntity> findByNameIgnoreCase(String name);
+
     boolean existsByPokedexNumber(Integer pokedexNumber);
 
     boolean existsByNameIgnoreCase(String name);
