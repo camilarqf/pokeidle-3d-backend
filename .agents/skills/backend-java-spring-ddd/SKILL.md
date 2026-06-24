@@ -43,15 +43,20 @@ Estrutura recomendada:
 ```text
 api
 ├── controllers
-├── dtos
+├── contracts
 ├── handlers
 └── mappers
 
 application
-├── commands
-├── queries
-├── handlers
 ├── usecases
+│   ├── criarcliente
+│   │   ├── CriarClienteCommand.java
+│   │   ├── CriarClienteUseCase.java
+│   │   └── CriarClienteHandler.java
+│   └── buscarclienteporid
+│       ├── BuscarClientePorIdQuery.java
+│       ├── BuscarClientePorIdUseCase.java
+│       └── BuscarClientePorIdHandler.java
 ├── services
 └── events
 
@@ -72,6 +77,21 @@ infra
 └── integrations
 ```
 
+## Padrão sedoc traduzido para Java
+
+Use `https://github.com/camilarqf/sedoc` como referência arquitetural. O projeto de referência é .NET/C#, então adapte o padrão para Java/Spring em vez de copiar nomes ou tecnologia literalmente.
+
+Mapeamento principal:
+
+* `Sedoc.Api/Endpoints/Recurso/CasoDeUso` vira `api.controllers` ou `api.endpoints`; requests/responses ficam em `api.contracts`.
+* `Sedoc.Application/UseCases/CasoDeUso` vira `application.usecases.<caso>` quando houver vários casos de uso. Command/Query e Handler devem ficar próximos do caso de uso.
+* `Sedoc.Domain/<Contexto>/Aggregates|Entities|ValueObjects|Repositories` vira `domain.entities`, `domain.valueobjects` e `domain.repositories` enquanto o domínio for pequeno; ao crescer, agrupar por contexto/recurso.
+* `Sedoc.Infrastructure.Data/Contexts/Default/Repositories` vira `infra.repositories`.
+* `Sedoc.Infrastructure.Data/Contexts/Default/Mappings` vira `infra.mappers` ou mappers coesos junto ao adapter de repositório quando forem pequenos.
+* `infra.persistence` deve conter entidades/modelos JPA e detalhes de tabela. Interfaces Spring Data e adapters concretos devem ficar em `infra.repositories`.
+
+Ao evoluir código existente, migrar incrementalmente e manter comportamento estável.
+
 ## Idioma e Nomenclatura
 
 Usar português para classes, métodos, atributos e conceitos de domínio.
@@ -81,16 +101,18 @@ Manter termos técnicos apenas quando forem padrões reconhecidos:
 * Command
 * Query
 * Handler
-* DTO
+* Request
+* Response
+* Contract
 * Repository
 * Controller
 
 Exemplos válidos:
 
 * CriarClienteCommand
-* CriarClienteCommandHandler
+* CriarClienteHandler
 * BuscarClientePorIdQuery
-* BuscarClientePorIdQueryHandler
+* BuscarClientePorIdHandler
 * Cliente
 * ClienteId
 * Email
@@ -158,6 +180,26 @@ public record CriarClienteCommand(
 
 ## Event Driven Domain
 
+No projeto `poke-idle-3d`, siga primeiro o desenho documentado em
+`references/arquitetura.md`. Ele descreve a base EDD atual do repositorio,
+incluindo `IAggregate`, `AggregateEventManager`, `DomainEvent`,
+`CorrelationKey`, `UnitOfWork`, `UnidadeTrabalhoEventosDominio`,
+`PublicadorEventosDominio`, `DomainNotification`, `StoreEventHandler`,
+`CommandBus`, `QueryBus`, `CorrelationKeyFilter` e o fluxo de publicacao apos
+persistencia.
+
+Use os nomes do `sedoc` quando forem conceitos arquiteturais centrais:
+
+* `AggregateEventManager` para aggregates que acumulam eventos
+* `IAggregate` para contrato de aggregates com eventos
+* `DomainEvent` para eventos concretos do dominio
+* `UnitOfWork` para publicacao apos persistencia
+* `DomainNotification` para persistencia no event store
+* `StoreEventHandler` para gravar a tabela `TB_EVENTO`
+
+`AggregateRoot` pode existir como alias/compatibilidade, mas o padrao novo no
+projeto e herdar de `AggregateEventManager`.
+
 Aggregates podem registrar Domain Events.
 
 Domain Events devem conter:
@@ -167,13 +209,20 @@ Domain Events devem conter:
 * CorrelationKey
 * dados mínimos necessários para o consumidor
 
-Eventos devem ser publicados a partir da camada application ou infra.
+Eventos devem ser publicados a partir de uma unidade de trabalho ou mecanismo
+equivalente da camada application/infra, apos a persistencia do aggregate.
 
 O domínio deve apenas registrar eventos, não publicar em mensageria diretamente.
 
 Criar abstrações como PublicadorEventosDominio quando necessário.
 
 Implementações de mensageria devem ficar em infra.messaging.
+
+Evite publicar eventos diretamente no Command Handler. O padrão preferido neste
+projeto e: Handler salva aggregate -> Repository registra aggregate salvo na
+UnidadeTrabalhoEventosDominio -> UnidadeTrabalhoEventosDominio publica apos
+commit -> PublicadorEventosDominio publica `DomainNotification` e evento
+concreto -> StoreEventHandler grava `TB_EVENTO` -> UnitOfWork limpa eventos.
 
 ## CorrelationKey
 
@@ -212,9 +261,9 @@ Controllers devem apenas:
 
 Não expor entidades de domínio diretamente na API.
 
-Usar DTOs para request e response.
+Usar contracts para request e response.
 
-Usar Jakarta Validation nos DTOs.
+Usar Jakarta Validation nos contracts de entrada.
 
 Usar status HTTP corretos.
 
@@ -254,7 +303,9 @@ Usar migrations versionadas.
 
 Preferir Flyway quando não houver padrão existente.
 
-Manter entidades JPA e detalhes de persistência em infra.
+Manter entidades JPA e detalhes de persistência em `infra.persistence`.
+
+Manter Spring Data repositories, adapters concretos e implementações de repositório em `infra.repositories`.
 
 Quando o domínio ficar poluído por anotações JPA, separar modelo de domínio e modelo de persistência.
 
@@ -342,12 +393,12 @@ Ao implementar uma funcionalidade:
 
 1. Identificar o Aggregate principal.
 2. Modelar Value Objects antes de criar entidades.
-3. Criar Commands e Queries.
-4. Criar Handlers.
+3. Criar um pacote em `application.usecases.<caso>` para cada caso de uso.
+4. Colocar Command/Query, UseCase e Handler dentro do pacote do respectivo caso de uso.
 5. Criar eventos de domínio quando houver mudança relevante de estado.
 6. Criar interfaces de repositório no domínio ou application.
 7. Implementar persistência em infra.
-8. Criar DTOs, mappers e controllers em api.
+8. Criar contracts, mappers e controllers/endpoints em api.
 9. Adicionar tratamento global de erro.
 10. Adicionar migrations.
 11. Adicionar testes.

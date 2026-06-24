@@ -1,10 +1,11 @@
 package br.com.pokeidle3d.infra.repositories;
 
+import br.com.pokeidle3d.application.events.UnidadeTrabalhoEventosDominio;
 import br.com.pokeidle3d.domain.entities.Species;
 import br.com.pokeidle3d.domain.exceptions.SpeciesDuplicadaException;
 import br.com.pokeidle3d.domain.repositories.SpeciesRepository;
 import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
-import br.com.pokeidle3d.infra.persistence.SpringDataSpeciesJpaRepository;
+import br.com.pokeidle3d.infra.mappers.SpeciesJpaMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,16 +19,24 @@ public class SpeciesRepositoryJpa implements SpeciesRepository {
 
     private final SpringDataSpeciesJpaRepository repository;
     private final SpeciesJpaMapper mapper;
+    private final UnidadeTrabalhoEventosDominio unidadeTrabalhoEventosDominio;
 
-    public SpeciesRepositoryJpa(SpringDataSpeciesJpaRepository repository, SpeciesJpaMapper mapper) {
+    public SpeciesRepositoryJpa(
+            SpringDataSpeciesJpaRepository repository,
+            SpeciesJpaMapper mapper,
+            UnidadeTrabalhoEventosDominio unidadeTrabalhoEventosDominio
+    ) {
         this.repository = repository;
         this.mapper = mapper;
+        this.unidadeTrabalhoEventosDominio = unidadeTrabalhoEventosDominio;
     }
 
     @Override
     public Species salvar(Species species) {
         try {
-            return mapper.paraDominio(repository.save(mapper.paraJpa(species)));
+            Species speciesSalva = mapper.paraDominio(repository.save(mapper.paraJpa(species)));
+            unidadeTrabalhoEventosDominio.registrar(species, speciesSalva.getId());
+            return speciesSalva;
         } catch (DataIntegrityViolationException exception) {
             throw new SpeciesDuplicadaException("Ja existe especie com este numero da Pokedex ou nome");
         }

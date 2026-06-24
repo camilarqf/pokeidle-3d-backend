@@ -1,6 +1,9 @@
 package br.com.pokeidle3d.api.handlers;
 
-import br.com.pokeidle3d.api.dtos.ErroResponse;
+import br.com.pokeidle3d.api.context.CorrelationKeyContext;
+import br.com.pokeidle3d.api.contracts.ErroResponse;
+import br.com.pokeidle3d.domain.exceptions.MoveDuplicadoException;
+import br.com.pokeidle3d.domain.exceptions.MoveNaoEncontradoException;
 import br.com.pokeidle3d.domain.exceptions.SpeciesDuplicadaException;
 import br.com.pokeidle3d.domain.exceptions.SpeciesNaoEncontradaException;
 import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
@@ -13,6 +16,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.List;
@@ -20,13 +26,21 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(SpeciesNaoEncontradaException.class)
-    public ResponseEntity<ErroResponse> tratarNaoEncontrada(SpeciesNaoEncontradaException exception, HttpServletRequest request) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    private final CorrelationKeyContext correlationKeyContext;
+
+    public GlobalExceptionHandler(CorrelationKeyContext correlationKeyContext) {
+        this.correlationKeyContext = correlationKeyContext;
+    }
+
+    @ExceptionHandler({SpeciesNaoEncontradaException.class, MoveNaoEncontradoException.class})
+    public ResponseEntity<ErroResponse> tratarNaoEncontrada(RuntimeException exception, HttpServletRequest request) {
         return criarErro(HttpStatus.NOT_FOUND, exception.getMessage(), request, List.of());
     }
 
-    @ExceptionHandler(SpeciesDuplicadaException.class)
-    public ResponseEntity<ErroResponse> tratarDuplicada(SpeciesDuplicadaException exception, HttpServletRequest request) {
+    @ExceptionHandler({SpeciesDuplicadaException.class, MoveDuplicadoException.class})
+    public ResponseEntity<ErroResponse> tratarDuplicada(RuntimeException exception, HttpServletRequest request) {
         return criarErro(HttpStatus.CONFLICT, exception.getMessage(), request, List.of());
     }
 
@@ -55,18 +69,32 @@ public class GlobalExceptionHandler {
         return criarErro(HttpStatus.BAD_REQUEST, "Payload invalido", request, List.of("JSON invalido ou valor incompativel"));
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErroResponse> tratarTipoParametroInvalido(MethodArgumentTypeMismatchException exception, HttpServletRequest request) {
+        return criarErro(HttpStatus.BAD_REQUEST, "Parametro invalido", request, List.of("Valor invalido para " + exception.getName()));
+    }
+
     private ResponseEntity<ErroResponse> criarErro(
             HttpStatus status,
             String mensagem,
             HttpServletRequest request,
             List<String> detalhes
     ) {
+        String correlationKey = correlationKeyContext.atual().value();
+        LOGGER.warn(
+                "Erro tratado na API: status={}, path={}, correlationKey={}, mensagem={}",
+                status.value(),
+                request.getRequestURI(),
+                correlationKey,
+                mensagem
+        );
         ErroResponse response = new ErroResponse(
                 Instant.now(),
                 status.value(),
                 status.getReasonPhrase(),
                 mensagem,
                 request.getRequestURI(),
+                correlationKey,
                 detalhes
         );
         return ResponseEntity.status(status).body(response);

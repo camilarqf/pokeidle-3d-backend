@@ -11,18 +11,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
-@Getter
 @Entity
 @Table(name = "especies")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class SpeciesJpaEntity {
 
     @Id
@@ -73,6 +66,43 @@ public class SpeciesJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    protected SpeciesJpaEntity() {
+    }
+
+    public SpeciesJpaEntity(
+            Long id,
+            Integer pokedexNumber,
+            String name,
+            PokemonType primaryType,
+            PokemonType secondaryType,
+            Integer baseHp,
+            Integer baseAttack,
+            Integer baseDefense,
+            Integer baseSpecialAttack,
+            Integer baseSpecialDefense,
+            Integer baseSpeed,
+            String spriteRef,
+            String model3dRef,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this.id = id;
+        this.pokedexNumber = pokedexNumber;
+        this.name = name;
+        this.primaryType = primaryType;
+        this.secondaryType = secondaryType;
+        this.baseHp = baseHp;
+        this.baseAttack = baseAttack;
+        this.baseDefense = baseDefense;
+        this.baseSpecialAttack = baseSpecialAttack;
+        this.baseSpecialDefense = baseSpecialDefense;
+        this.baseSpeed = baseSpeed;
+        this.spriteRef = spriteRef;
+        this.model3dRef = model3dRef;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     @PrePersist
     void prePersist() {
         Instant agora = Instant.now();
@@ -83,5 +113,65 @@ public class SpeciesJpaEntity {
     @PreUpdate
     void preUpdate() {
         updatedAt = Instant.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Integer getPokedexNumber() {
+        return pokedexNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public PokemonType getPrimaryType() {
+        return primaryType;
+    }
+
+    public PokemonType getSecondaryType() {
+        return secondaryType;
+    }
+
+    public Integer getBaseHp() {
+        return baseHp;
+    }
+
+    public Integer getBaseAttack() {
+        return baseAttack;
+    }
+
+    public Integer getBaseDefense() {
+        return baseDefense;
+    }
+
+    public Integer getBaseSpecialAttack() {
+        return baseSpecialAttack;
+    }
+
+    public Integer getBaseSpecialDefense() {
+        return baseSpecialDefense;
+    }
+
+    public Integer getBaseSpeed() {
+        return baseSpeed;
+    }
+
+    public String getSpriteRef() {
+        return spriteRef;
+    }
+
+    public String getModel3dRef() {
+        return model3dRef;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 }
