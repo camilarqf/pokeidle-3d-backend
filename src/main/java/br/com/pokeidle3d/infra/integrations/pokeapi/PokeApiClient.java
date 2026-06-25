@@ -1,6 +1,7 @@
 package br.com.pokeidle3d.infra.integrations.pokeapi;
 
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -10,7 +11,7 @@ public class PokeApiClient {
 
     private final RestClient restClient;
 
-    public PokeApiClient(RestClient pokeApiRestClient) {
+    public PokeApiClient(@Qualifier("pokeApiRestClient") RestClient pokeApiRestClient) {
         this.restClient = pokeApiRestClient;
     }
 
