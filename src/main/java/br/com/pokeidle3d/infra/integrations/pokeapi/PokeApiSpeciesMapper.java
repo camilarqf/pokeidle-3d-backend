@@ -10,7 +10,8 @@ import java.util.List;
 @Component
 public class PokeApiSpeciesMapper {
 
-    private static final String MODEL_3D_REF_PREFIX = "pokemon-3d-api:";
+    private static final String POKEMON_3D_ASSETS_BASE_URL =
+            "https://raw.githubusercontent.com/Pokemon-3D-api/assets/main/models/opt/regular/";
 
     public Species paraSpecies(PokeApiPokemonResponse response) {
         validarResponse(response);
@@ -36,7 +37,7 @@ public class PokeApiSpeciesMapper {
                 statObrigatorio(response, "special-defense"),
                 statObrigatorio(response, "speed"),
                 response.sprites() == null ? null : response.sprites().front_default(),
-                MODEL_3D_REF_PREFIX + response.name(),
+                POKEMON_3D_ASSETS_BASE_URL + response.id() + ".glb",
                 null,
                 null
         );

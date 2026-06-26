@@ -28,7 +28,8 @@ class PokeApiSpeciesMapperTest {
         assertThat(species.getBaseSpecialDefense()).isEqualTo(65);
         assertThat(species.getBaseSpeed()).isEqualTo(45);
         assertThat(species.getSpriteRef()).isEqualTo("https://img/bulbasaur.png");
-        assertThat(species.getModel3dRef()).isEqualTo("pokemon-3d-api:bulbasaur");
+        assertThat(species.getModel3dRef())
+                .isEqualTo("https://raw.githubusercontent.com/Pokemon-3D-api/assets/main/models/opt/regular/1.glb");
         assertThat(species.events()).isEmpty();
     }
 

@@ -73,7 +73,7 @@ class PokemonPrototypeImporterTest {
                 50,
                 65,
                 "sprite",
-                "pokemon-3d-api:" + name,
+                "https://raw.githubusercontent.com/Pokemon-3D-api/assets/main/models/opt/regular/" + pokedexNumber + ".glb",
                 null,
                 null
         );
