@@ -1,9 +1,12 @@
 package br.com.pokeidle3d.domain.services;
 
+import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,6 +52,24 @@ class TypeEffectivenessMatrixTest {
     }
 
     @Test
+    void deveCalcularEfetividadeContraPokemonComUmTipo() {
+        assertEffectiveness(PokemonType.FIRE, List.of(PokemonType.GRASS), TypeEffectivenessMatrix.SUPER_EFFECTIVE);
+        assertEffectiveness(PokemonType.FIRE, List.of(PokemonType.WATER), TypeEffectivenessMatrix.NOT_EFFECTIVE);
+        assertEffectiveness(PokemonType.ELECTRIC, List.of(PokemonType.GROUND), TypeEffectivenessMatrix.IMMUNE);
+        assertEffectiveness(PokemonType.NORMAL, List.of(PokemonType.NORMAL), TypeEffectivenessMatrix.NORMAL);
+    }
+
+    @Test
+    void deveCalcularEfetividadeContraPokemonComDoisTipos() {
+        assertEffectiveness(PokemonType.FIRE, List.of(PokemonType.GRASS, PokemonType.STEEL), BigDecimal.valueOf(4.0));
+        assertEffectiveness(PokemonType.FIRE, List.of(PokemonType.WATER, PokemonType.ROCK), BigDecimal.valueOf(0.25));
+        assertEffectiveness(PokemonType.ELECTRIC, List.of(PokemonType.WATER, PokemonType.FLYING), BigDecimal.valueOf(4.0));
+        assertEffectiveness(PokemonType.ELECTRIC, List.of(PokemonType.WATER, PokemonType.GROUND), TypeEffectivenessMatrix.IMMUNE);
+        assertEffectiveness(PokemonType.FIGHTING, List.of(PokemonType.NORMAL, PokemonType.DARK), BigDecimal.valueOf(4.0));
+        assertEffectiveness(PokemonType.GROUND, List.of(PokemonType.FIRE, PokemonType.FLYING), TypeEffectivenessMatrix.IMMUNE);
+    }
+
+    @Test
     void deveRetornarValorParaTodasAsCombinacoes() {
         int totalCombinacoes = 0;
 
@@ -82,7 +103,60 @@ class TypeEffectivenessMatrixTest {
                 .hasMessageContaining("defendingType");
     }
 
+    @Test
+    void deveLancarExcecaoQuandoTipoAtacanteDaEfetividadeForNulo() {
+        assertThatThrownBy(() -> matrix.getEffectiveness(null, List.of(PokemonType.NORMAL)))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("Tipo atacante");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoTiposDefensoresForemNulos() {
+        assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL, null))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("Tipos defensores");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoTiposDefensoresEstiveremVazios() {
+        assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL, List.of()))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("ao menos um tipo defensor");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoHouverMaisDeDoisTiposDefensores() {
+        assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL,
+                List.of(PokemonType.NORMAL, PokemonType.FLYING, PokemonType.FAIRY)))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("maximo dois tipos");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoHouverTipoDefensorNulo() {
+        assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL,
+                Collections.singletonList(null)))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("Tipo defensor");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoHouverTiposDefensoresDuplicados() {
+        assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL,
+                List.of(PokemonType.NORMAL, PokemonType.NORMAL)))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("duplicados");
+    }
+
     private void assertMultiplier(PokemonType attackingType, PokemonType defendingType, BigDecimal expectedMultiplier) {
         assertThat(matrix.getMultiplier(attackingType, defendingType)).isEqualByComparingTo(expectedMultiplier);
+    }
+
+    private void assertEffectiveness(
+            PokemonType attackType,
+            List<PokemonType> defenseTypes,
+            BigDecimal expectedEffectiveness
+    ) {
+        assertThat(matrix.getEffectiveness(attackType, defenseTypes)).isEqualByComparingTo(expectedEffectiveness);
     }
 }
