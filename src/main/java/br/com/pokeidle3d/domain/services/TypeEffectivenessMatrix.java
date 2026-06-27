@@ -1,10 +1,13 @@
 package br.com.pokeidle3d.domain.services;
 
+import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,6 +35,18 @@ public final class TypeEffectivenessMatrix {
         Objects.requireNonNull(defendingType, "defendingType nao pode ser nulo");
 
         return multipliers.get(attackingType).get(defendingType);
+    }
+
+    public BigDecimal getEffectiveness(PokemonType attackType, List<PokemonType> defenseTypes) {
+        validateEffectivenessInput(attackType, defenseTypes);
+
+        BigDecimal result = NORMAL;
+
+        for (PokemonType defenseType : defenseTypes) {
+            result = result.multiply(getMultiplier(attackType, defenseType));
+        }
+
+        return result;
     }
 
     private static Map<PokemonType, Map<PokemonType, BigDecimal>> buildMatrix() {
@@ -131,6 +146,36 @@ public final class TypeEffectivenessMatrix {
 
         for (PokemonType defendingType : defendingTypes) {
             row.put(defendingType, multiplier);
+        }
+    }
+
+    private static void validateEffectivenessInput(PokemonType attackType, List<PokemonType> defenseTypes) {
+        if (attackType == null) {
+            throw new ValidacaoDominioException("Tipo atacante e obrigatorio");
+        }
+
+        if (defenseTypes == null) {
+            throw new ValidacaoDominioException("Tipos defensores sao obrigatorios");
+        }
+
+        if (defenseTypes.isEmpty()) {
+            throw new ValidacaoDominioException("Deve haver ao menos um tipo defensor");
+        }
+
+        if (defenseTypes.size() > 2) {
+            throw new ValidacaoDominioException("Pokemon defensor deve ter no maximo dois tipos");
+        }
+
+        EnumSet<PokemonType> uniqueDefenseTypes = EnumSet.noneOf(PokemonType.class);
+
+        for (PokemonType defenseType : defenseTypes) {
+            if (defenseType == null) {
+                throw new ValidacaoDominioException("Tipo defensor nao pode ser nulo");
+            }
+
+            if (!uniqueDefenseTypes.add(defenseType)) {
+                throw new ValidacaoDominioException("Tipos defensores nao podem ser duplicados");
+            }
         }
     }
 
