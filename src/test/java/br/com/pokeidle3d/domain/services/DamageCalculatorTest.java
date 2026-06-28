@@ -4,6 +4,7 @@ import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,7 +13,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class DamageCalculatorTest {
 
-    private final DamageCalculator calculator = new DamageCalculator();
+    private final DamageCalculator calculator = new DamageCalculator(
+            new FixedDamageRandomFactorProvider(BigDecimal.valueOf(1.00))
+    );
 
     @Test
     void deveCalcularDanoBaseParaLevelBaixo() {
@@ -114,6 +117,47 @@ class DamageCalculatorTest {
     }
 
     @Test
+    void deveManterDanoAnteriorQuandoFatorAleatorioForUm() {
+        DamageCalculator fixedCalculator = new DamageCalculator(
+                new FixedDamageRandomFactorProvider(BigDecimal.valueOf(1.00))
+        );
+        DamageCalculationInput input = new DamageCalculationInput(
+                20,
+                40,
+                50,
+                50,
+                PokemonType.FIRE,
+                List.of(PokemonType.FIRE),
+                List.of(PokemonType.GRASS)
+        );
+
+        int damage = fixedCalculator.calculateDamage(input);
+
+        assertThat(damage).isEqualTo(30);
+    }
+
+    @Test
+    void deveReduzirDanoQuandoFatorAleatorioForMinimo() {
+        DamageCalculator fixedCalculator = new DamageCalculator(
+                new FixedDamageRandomFactorProvider(BigDecimal.valueOf(0.85))
+        );
+        DamageCalculationInput input = new DamageCalculationInput(
+                50,
+                43,
+                50,
+                50,
+                PokemonType.FIRE,
+                List.of(PokemonType.FIRE),
+                List.of(PokemonType.GRASS)
+        );
+
+        int damage = fixedCalculator.calculateDamage(input);
+
+        assertThat(calculator.calculateBaseDamage(input)).isEqualTo(20);
+        assertThat(damage).isEqualTo(51);
+    }
+
+    @Test
     void deveRetornarZeroQuandoEfetividadeForImunidade() {
         DamageCalculationInput input = new DamageCalculationInput(
                 20,
@@ -132,6 +176,9 @@ class DamageCalculatorTest {
 
     @Test
     void naoDeveAplicarDanoMinimoEmCasoDeImunidade() {
+        DamageCalculator fixedCalculator = new DamageCalculator(
+                new FixedDamageRandomFactorProvider(BigDecimal.valueOf(0.85))
+        );
         DamageCalculationInput input = new DamageCalculationInput(
                 1,
                 1,
@@ -142,13 +189,48 @@ class DamageCalculatorTest {
                 List.of(PokemonType.GROUND)
         );
 
-        int damage = calculator.calculateDamage(input);
+        int damage = fixedCalculator.calculateDamage(input);
 
         assertThat(damage).isZero();
     }
 
     @Test
+    void naoDeveObterFatorAleatorioQuandoHouverImunidade() {
+        DamageCalculator fixedCalculator = new DamageCalculator(() -> {
+            throw new AssertionError("Fator aleatorio nao deveria ser obtido em caso de imunidade");
+        });
+        DamageCalculationInput input = new DamageCalculationInput(
+                20,
+                40,
+                50,
+                50,
+                PokemonType.NORMAL,
+                List.of(PokemonType.NORMAL),
+                List.of(PokemonType.GHOST)
+        );
+
+        int damage = fixedCalculator.calculateDamage(input);
+
+        assertThat(damage).isZero();
+    }
+
+    @Test
+    void deveObterFatorAleatorioACadaCalculoDeDano() {
+        CountingDamageRandomFactorProvider provider = new CountingDamageRandomFactorProvider(BigDecimal.valueOf(1.00));
+        DamageCalculator fixedCalculator = new DamageCalculator(provider);
+        DamageCalculationInput input = input(20, 40, 50, 50);
+
+        fixedCalculator.calculateDamage(input);
+        fixedCalculator.calculateDamage(input);
+
+        assertThat(provider.calls()).isEqualTo(2);
+    }
+
+    @Test
     void deveArredondarDanoFinalParaBaixo() {
+        DamageCalculator fixedCalculator = new DamageCalculator(
+                new FixedDamageRandomFactorProvider(BigDecimal.valueOf(0.85))
+        );
         DamageCalculationInput input = new DamageCalculationInput(
                 13,
                 40,
@@ -159,9 +241,10 @@ class DamageCalculatorTest {
                 List.of(PokemonType.WATER)
         );
 
-        int damage = calculator.calculateDamage(input);
+        int damage = fixedCalculator.calculateDamage(input);
 
-        assertThat(damage).isEqualTo(5);
+        assertThat(calculator.calculateBaseDamage(input)).isEqualTo(7);
+        assertThat(damage).isEqualTo(4);
     }
 
     @Test
@@ -307,6 +390,13 @@ class DamageCalculatorTest {
         assertThat(secondDamage).isEqualTo(firstDamage);
     }
 
+    @Test
+    void deveLancarExcecaoQuandoProviderDeFatorAleatorioForNulo() {
+        assertThatThrownBy(() -> new DamageCalculator(null))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("Provider de fator aleatorio");
+    }
+
     private int damage(PokemonType moveType, List<PokemonType> attackerTypes, List<PokemonType> defenderTypes) {
         DamageCalculationInput input = new DamageCalculationInput(
                 20,
@@ -331,5 +421,25 @@ class DamageCalculatorTest {
                 List.of(PokemonType.NORMAL),
                 List.of(PokemonType.NORMAL)
         );
+    }
+
+    private static final class CountingDamageRandomFactorProvider implements DamageRandomFactorProvider {
+
+        private final BigDecimal factor;
+        private int calls;
+
+        private CountingDamageRandomFactorProvider(BigDecimal factor) {
+            this.factor = factor;
+        }
+
+        @Override
+        public BigDecimal nextFactor() {
+            calls++;
+            return factor;
+        }
+
+        private int calls() {
+            return calls;
+        }
     }
 }
