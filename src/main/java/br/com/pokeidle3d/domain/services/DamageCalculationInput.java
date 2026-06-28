@@ -12,7 +12,8 @@ public record DamageCalculationInput(
         int attack,
         int defense,
         PokemonType moveType,
-        List<PokemonType> attackerTypes
+        List<PokemonType> attackerTypes,
+        List<PokemonType> defenderTypes
 ) {
 
     public DamageCalculationInput {
@@ -21,8 +22,24 @@ public record DamageCalculationInput(
         validatePositive(attack, "Ataque");
         validatePositive(defense, "Defesa");
         validateMoveType(moveType);
-        validateAttackerTypes(attackerTypes);
+        validatePokemonTypes(
+                attackerTypes,
+                "Tipos do atacante sao obrigatorios",
+                "Deve haver ao menos um tipo do atacante",
+                "Pokemon atacante deve ter no maximo dois tipos",
+                "Tipo do atacante nao pode ser nulo",
+                "Tipos do atacante nao podem ser duplicados"
+        );
+        validatePokemonTypes(
+                defenderTypes,
+                "Tipos defensores sao obrigatorios",
+                "Deve haver ao menos um tipo defensor",
+                "Pokemon defensor deve ter no maximo dois tipos",
+                "Tipo defensor nao pode ser nulo",
+                "Tipos defensores nao podem ser duplicados"
+        );
         attackerTypes = List.copyOf(attackerTypes);
+        defenderTypes = List.copyOf(defenderTypes);
     }
 
     private static void validatePositive(int value, String fieldName) {
@@ -37,28 +54,35 @@ public record DamageCalculationInput(
         }
     }
 
-    private static void validateAttackerTypes(List<PokemonType> attackerTypes) {
-        if (attackerTypes == null) {
-            throw new ValidacaoDominioException("Tipos do atacante sao obrigatorios");
+    private static void validatePokemonTypes(
+            List<PokemonType> types,
+            String nullMessage,
+            String emptyMessage,
+            String tooManyMessage,
+            String nullTypeMessage,
+            String duplicatedMessage
+    ) {
+        if (types == null) {
+            throw new ValidacaoDominioException(nullMessage);
         }
 
-        if (attackerTypes.isEmpty()) {
-            throw new ValidacaoDominioException("Deve haver ao menos um tipo do atacante");
+        if (types.isEmpty()) {
+            throw new ValidacaoDominioException(emptyMessage);
         }
 
-        if (attackerTypes.size() > 2) {
-            throw new ValidacaoDominioException("Pokemon atacante deve ter no maximo dois tipos");
+        if (types.size() > 2) {
+            throw new ValidacaoDominioException(tooManyMessage);
         }
 
-        EnumSet<PokemonType> uniqueAttackerTypes = EnumSet.noneOf(PokemonType.class);
+        EnumSet<PokemonType> uniqueTypes = EnumSet.noneOf(PokemonType.class);
 
-        for (PokemonType attackerType : attackerTypes) {
-            if (attackerType == null) {
-                throw new ValidacaoDominioException("Tipo do atacante nao pode ser nulo");
+        for (PokemonType type : types) {
+            if (type == null) {
+                throw new ValidacaoDominioException(nullTypeMessage);
             }
 
-            if (!uniqueAttackerTypes.add(attackerType)) {
-                throw new ValidacaoDominioException("Tipos do atacante nao podem ser duplicados");
+            if (!uniqueTypes.add(type)) {
+                throw new ValidacaoDominioException(duplicatedMessage);
             }
         }
     }
