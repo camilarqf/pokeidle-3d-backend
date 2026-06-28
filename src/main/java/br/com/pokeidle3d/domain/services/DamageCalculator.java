@@ -2,9 +2,23 @@ package br.com.pokeidle3d.domain.services;
 
 import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 
 public final class DamageCalculator {
+
+    private final StabCalculator stabCalculator = new StabCalculator();
+
+    public int calculateDamage(DamageCalculationInput input) {
+        int baseDamage = calculateBaseDamage(input);
+        BigDecimal stabMultiplier = stabCalculator.calculate(input.moveType(), input.attackerTypes());
+        BigDecimal damage = BigDecimal.valueOf(baseDamage)
+                .multiply(stabMultiplier)
+                .setScale(0, RoundingMode.DOWN);
+
+        return Math.max(1, toIntDamage(damage));
+    }
 
     public int calculateBaseDamage(DamageCalculationInput input) {
         if (input == null) {
@@ -19,6 +33,14 @@ public final class DamageCalculator {
                 .add(BigInteger.valueOf(2));
 
         return Math.max(1, toIntDamage(damage));
+    }
+
+    private int toIntDamage(BigDecimal damage) {
+        if (damage.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) > 0) {
+            throw new ValidacaoDominioException("Dano calculado excede o limite inteiro suportado");
+        }
+
+        return damage.intValue();
     }
 
     private int toIntDamage(BigInteger damage) {
