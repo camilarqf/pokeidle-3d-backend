@@ -10,6 +10,19 @@ public final class DamageCalculator {
 
     private final StabCalculator stabCalculator = new StabCalculator();
     private final TypeEffectivenessMatrix typeEffectivenessMatrix = TypeEffectivenessMatrix.getInstance();
+    private final DamageRandomFactorProvider randomFactorProvider;
+
+    public DamageCalculator() {
+        this(new RandomDamageRandomFactorProvider());
+    }
+
+    public DamageCalculator(DamageRandomFactorProvider randomFactorProvider) {
+        if (randomFactorProvider == null) {
+            throw new ValidacaoDominioException("Provider de fator aleatorio de dano e obrigatorio");
+        }
+
+        this.randomFactorProvider = randomFactorProvider;
+    }
 
     public int calculateDamage(DamageCalculationInput input) {
         int baseDamage = calculateBaseDamage(input);
@@ -20,9 +33,11 @@ public final class DamageCalculator {
             return 0;
         }
 
+        BigDecimal randomFactor = randomFactorProvider.nextFactor();
         BigDecimal damage = BigDecimal.valueOf(baseDamage)
                 .multiply(stabMultiplier)
                 .multiply(typeEffectiveness)
+                .multiply(randomFactor)
                 .setScale(0, RoundingMode.DOWN);
 
         return Math.max(1, toIntDamage(damage));
