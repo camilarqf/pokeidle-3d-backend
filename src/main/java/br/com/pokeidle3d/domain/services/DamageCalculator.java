@@ -9,12 +9,20 @@ import java.math.RoundingMode;
 public final class DamageCalculator {
 
     private final StabCalculator stabCalculator = new StabCalculator();
+    private final TypeEffectivenessMatrix typeEffectivenessMatrix = TypeEffectivenessMatrix.getInstance();
 
     public int calculateDamage(DamageCalculationInput input) {
         int baseDamage = calculateBaseDamage(input);
         BigDecimal stabMultiplier = stabCalculator.calculate(input.moveType(), input.attackerTypes());
+        BigDecimal typeEffectiveness = typeEffectivenessMatrix.getEffectiveness(input.moveType(), input.defenderTypes());
+
+        if (typeEffectiveness.compareTo(BigDecimal.ZERO) == 0) {
+            return 0;
+        }
+
         BigDecimal damage = BigDecimal.valueOf(baseDamage)
                 .multiply(stabMultiplier)
+                .multiply(typeEffectiveness)
                 .setScale(0, RoundingMode.DOWN);
 
         return Math.max(1, toIntDamage(damage));
