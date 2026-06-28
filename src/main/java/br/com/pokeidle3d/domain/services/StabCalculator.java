@@ -3,41 +3,30 @@ package br.com.pokeidle3d.domain.services;
 import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 
+import java.math.BigDecimal;
 import java.util.EnumSet;
 import java.util.List;
 
-public record DamageCalculationInput(
-        int attackerLevel,
-        int movePower,
-        int attack,
-        int defense,
-        PokemonType moveType,
-        List<PokemonType> attackerTypes
-) {
+public final class StabCalculator {
 
-    public DamageCalculationInput {
-        validatePositive(attackerLevel, "Nivel do atacante");
-        validatePositive(movePower, "Power do movimento");
-        validatePositive(attack, "Ataque");
-        validatePositive(defense, "Defesa");
-        validateMoveType(moveType);
-        validateAttackerTypes(attackerTypes);
-        attackerTypes = List.copyOf(attackerTypes);
-    }
+    public static final BigDecimal STAB = BigDecimal.valueOf(1.5);
+    public static final BigDecimal NO_STAB = BigDecimal.ONE;
 
-    private static void validatePositive(int value, String fieldName) {
-        if (value <= 0) {
-            throw new ValidacaoDominioException(fieldName + " deve ser maior que zero");
+    public BigDecimal calculate(PokemonType moveType, List<PokemonType> attackerTypes) {
+        validate(moveType, attackerTypes);
+
+        if (attackerTypes.contains(moveType)) {
+            return STAB;
         }
+
+        return NO_STAB;
     }
 
-    private static void validateMoveType(PokemonType moveType) {
+    private static void validate(PokemonType moveType, List<PokemonType> attackerTypes) {
         if (moveType == null) {
             throw new ValidacaoDominioException("Tipo do movimento e obrigatorio");
         }
-    }
 
-    private static void validateAttackerTypes(List<PokemonType> attackerTypes) {
         if (attackerTypes == null) {
             throw new ValidacaoDominioException("Tipos do atacante sao obrigatorios");
         }

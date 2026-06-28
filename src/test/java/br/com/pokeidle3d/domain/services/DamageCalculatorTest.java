@@ -1,7 +1,11 @@
 package br.com.pokeidle3d.domain.services;
 
 import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -12,7 +16,7 @@ class DamageCalculatorTest {
 
     @Test
     void deveCalcularDanoBaseParaLevelBaixo() {
-        DamageCalculationInput input = new DamageCalculationInput(5, 40, 49, 49);
+        DamageCalculationInput input = input(5, 40, 49, 49);
 
         int damage = calculator.calculateBaseDamage(input);
 
@@ -21,7 +25,7 @@ class DamageCalculatorTest {
 
     @Test
     void deveCalcularDanoBaseParaLevelIntermediario() {
-        DamageCalculationInput input = new DamageCalculationInput(50, 90, 120, 100);
+        DamageCalculationInput input = input(50, 90, 120, 100);
 
         int damage = calculator.calculateBaseDamage(input);
 
@@ -30,7 +34,7 @@ class DamageCalculatorTest {
 
     @Test
     void deveCalcularDanoBaseParaLevelAlto() {
-        DamageCalculationInput input = new DamageCalculationInput(100, 100, 200, 150);
+        DamageCalculationInput input = input(100, 100, 200, 150);
 
         int damage = calculator.calculateBaseDamage(input);
 
@@ -39,7 +43,7 @@ class DamageCalculatorTest {
 
     @Test
     void deveCalcularDanoBaseQuandoProdutoIntermediarioExcedeLimiteDoInt() {
-        DamageCalculationInput input = new DamageCalculationInput(100, 50000, 50000, 50000);
+        DamageCalculationInput input = input(100, 50000, 50000, 50000);
 
         int damage = calculator.calculateBaseDamage(input);
 
@@ -48,7 +52,7 @@ class DamageCalculatorTest {
 
     @Test
     void deveRetornarNoMinimoUmDeDanoParaEntradasValidas() {
-        DamageCalculationInput input = new DamageCalculationInput(1, 1, 1, Integer.MAX_VALUE);
+        DamageCalculationInput input = input(1, 1, 1, Integer.MAX_VALUE);
 
         int damage = calculator.calculateBaseDamage(input);
 
@@ -64,7 +68,7 @@ class DamageCalculatorTest {
 
     @Test
     void deveLancarExcecaoQuandoDanoFinalExcederLimiteDoInt() {
-        DamageCalculationInput input = new DamageCalculationInput(
+        DamageCalculationInput input = input(
                 Integer.MAX_VALUE,
                 Integer.MAX_VALUE,
                 Integer.MAX_VALUE,
@@ -77,40 +81,144 @@ class DamageCalculatorTest {
     }
 
     @Test
+    void deveAplicarStabAoDanoFinalInteiro() {
+        DamageCalculationInput input = new DamageCalculationInput(
+                20,
+                40,
+                50,
+                50,
+                PokemonType.FIRE,
+                List.of(PokemonType.FIRE)
+        );
+
+        int damage = calculator.calculateDamage(input);
+
+        assertThat(damage).isEqualTo(15);
+    }
+
+    @Test
+    void deveArredondarDanoFinalComStabParaBaixo() {
+        DamageCalculationInput input = new DamageCalculationInput(
+                13,
+                40,
+                50,
+                50,
+                PokemonType.FIRE,
+                List.of(PokemonType.FIRE)
+        );
+
+        int damage = calculator.calculateDamage(input);
+
+        assertThat(damage).isEqualTo(10);
+    }
+
+    @Test
+    void deveManterDanoFinalSemStab() {
+        DamageCalculationInput input = new DamageCalculationInput(
+                20,
+                40,
+                50,
+                50,
+                PokemonType.NORMAL,
+                List.of(PokemonType.FIRE)
+        );
+
+        int damage = calculator.calculateDamage(input);
+
+        assertThat(damage).isEqualTo(10);
+    }
+
+    @Test
     void deveLancarExcecaoQuandoLevelForMenorOuIgualAZero() {
-        assertThatThrownBy(() -> new DamageCalculationInput(0, 40, 49, 49))
+        assertThatThrownBy(() -> input(0, 40, 49, 49))
                 .isInstanceOf(ValidacaoDominioException.class)
                 .hasMessageContaining("Nivel do atacante");
     }
 
     @Test
     void deveLancarExcecaoQuandoMovePowerForMenorOuIgualAZero() {
-        assertThatThrownBy(() -> new DamageCalculationInput(5, 0, 49, 49))
+        assertThatThrownBy(() -> input(5, 0, 49, 49))
                 .isInstanceOf(ValidacaoDominioException.class)
                 .hasMessageContaining("Power do movimento");
     }
 
     @Test
     void deveLancarExcecaoQuandoAttackForMenorOuIgualAZero() {
-        assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 0, 49))
+        assertThatThrownBy(() -> input(5, 40, 0, 49))
                 .isInstanceOf(ValidacaoDominioException.class)
                 .hasMessageContaining("Ataque");
     }
 
     @Test
     void deveLancarExcecaoQuandoDefenseForMenorOuIgualAZero() {
-        assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 0))
+        assertThatThrownBy(() -> input(5, 40, 49, 0))
                 .isInstanceOf(ValidacaoDominioException.class)
                 .hasMessageContaining("Defesa");
     }
 
     @Test
-    void deveSerDeterministicoParaAMesmaEntrada() {
-        DamageCalculationInput input = new DamageCalculationInput(50, 90, 120, 100);
+    void deveLancarExcecaoQuandoMoveTypeForNulo() {
+        assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, null, List.of(PokemonType.FIRE)))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("Tipo do movimento");
+    }
 
-        int firstDamage = calculator.calculateBaseDamage(input);
-        int secondDamage = calculator.calculateBaseDamage(input);
+    @Test
+    void deveLancarExcecaoQuandoTiposDoAtacanteForemNulos() {
+        assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE, null))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("Tipos do atacante");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoTiposDoAtacanteEstiveremVazios() {
+        assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE, List.of()))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("ao menos um tipo do atacante");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoHouverMaisDeDoisTiposDoAtacante() {
+        assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
+                List.of(PokemonType.FIRE, PokemonType.FLYING, PokemonType.DRAGON)))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("maximo dois tipos");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoHouverTipoDoAtacanteNulo() {
+        assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
+                Collections.singletonList(null)))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("Tipo do atacante");
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoHouverTiposDoAtacanteDuplicados() {
+        assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
+                List.of(PokemonType.FIRE, PokemonType.FIRE)))
+                .isInstanceOf(ValidacaoDominioException.class)
+                .hasMessageContaining("duplicados");
+    }
+
+    @Test
+    void deveSerDeterministicoParaAMesmaEntrada() {
+        DamageCalculationInput input = input(50, 90, 120, 100);
+
+        int firstDamage = calculator.calculateDamage(input);
+        int secondDamage = calculator.calculateDamage(input);
 
         assertThat(secondDamage).isEqualTo(firstDamage);
+    }
+
+    private DamageCalculationInput input(int attackerLevel, int movePower, int attack, int defense) {
+        return new DamageCalculationInput(
+                attackerLevel,
+                movePower,
+                attack,
+                defense,
+                PokemonType.NORMAL,
+                List.of(PokemonType.NORMAL)
+        );
     }
 }
