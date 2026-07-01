@@ -1,14 +1,14 @@
 package br.com.pokeidle3d.api.handlers;
 
 import br.com.pokeidle3d.api.context.CorrelationKeyContext;
-import br.com.pokeidle3d.api.contracts.ErroResponse;
-import br.com.pokeidle3d.domain.exceptions.MoveDuplicadoException;
-import br.com.pokeidle3d.domain.exceptions.MoveNaoEncontradoException;
-import br.com.pokeidle3d.domain.exceptions.SpeciesDuplicadaException;
-import br.com.pokeidle3d.domain.exceptions.SpeciesMoveDuplicadoException;
-import br.com.pokeidle3d.domain.exceptions.SpeciesMoveNaoEncontradoException;
-import br.com.pokeidle3d.domain.exceptions.SpeciesNaoEncontradaException;
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.api.contracts.ErrorResponse;
+import br.com.pokeidle3d.domain.exceptions.DuplicateMoveException;
+import br.com.pokeidle3d.domain.exceptions.MoveNotFoundException;
+import br.com.pokeidle3d.domain.exceptions.DuplicateSpeciesException;
+import br.com.pokeidle3d.domain.exceptions.DuplicateSpeciesMoveException;
+import br.com.pokeidle3d.domain.exceptions.SpeciesMoveNotFoundException;
+import br.com.pokeidle3d.domain.exceptions.SpeciesNotFoundException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
@@ -36,23 +36,23 @@ public class GlobalExceptionHandler {
         this.correlationKeyContext = correlationKeyContext;
     }
 
-    @ExceptionHandler({SpeciesNaoEncontradaException.class, MoveNaoEncontradoException.class, SpeciesMoveNaoEncontradoException.class})
-    public ResponseEntity<ErroResponse> tratarNaoEncontrada(RuntimeException exception, HttpServletRequest request) {
+    @ExceptionHandler({SpeciesNotFoundException.class, MoveNotFoundException.class, SpeciesMoveNotFoundException.class})
+    public ResponseEntity<ErrorResponse> tratarNaoEncontrada(RuntimeException exception, HttpServletRequest request) {
         return criarErro(HttpStatus.NOT_FOUND, exception.getMessage(), request, List.of());
     }
 
-    @ExceptionHandler({SpeciesDuplicadaException.class, MoveDuplicadoException.class, SpeciesMoveDuplicadoException.class})
-    public ResponseEntity<ErroResponse> tratarDuplicada(RuntimeException exception, HttpServletRequest request) {
+    @ExceptionHandler({DuplicateSpeciesException.class, DuplicateMoveException.class, DuplicateSpeciesMoveException.class})
+    public ResponseEntity<ErrorResponse> tratarDuplicada(RuntimeException exception, HttpServletRequest request) {
         return criarErro(HttpStatus.CONFLICT, exception.getMessage(), request, List.of());
     }
 
-    @ExceptionHandler(ValidacaoDominioException.class)
-    public ResponseEntity<ErroResponse> tratarValidacaoDominio(ValidacaoDominioException exception, HttpServletRequest request) {
+    @ExceptionHandler(DomainValidationException.class)
+    public ResponseEntity<ErrorResponse> tratarValidacaoDominio(DomainValidationException exception, HttpServletRequest request) {
         return criarErro(HttpStatus.BAD_REQUEST, exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErroResponse> tratarPayloadInvalido(MethodArgumentNotValidException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> tratarPayloadInvalido(MethodArgumentNotValidException exception, HttpServletRequest request) {
         List<String> detalhes = exception.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -62,21 +62,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({ConstraintViolationException.class, HandlerMethodValidationException.class})
-    public ResponseEntity<ErroResponse> tratarParametroInvalido(Exception exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> tratarParametroInvalido(Exception exception, HttpServletRequest request) {
         return criarErro(HttpStatus.BAD_REQUEST, "Parametro invalido", request, List.of(exception.getMessage()));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErroResponse> tratarJsonInvalido(HttpMessageNotReadableException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> tratarJsonInvalido(HttpMessageNotReadableException exception, HttpServletRequest request) {
         return criarErro(HttpStatus.BAD_REQUEST, "Payload invalido", request, List.of("JSON invalido ou valor incompativel"));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErroResponse> tratarTipoParametroInvalido(MethodArgumentTypeMismatchException exception, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> tratarTipoParametroInvalido(MethodArgumentTypeMismatchException exception, HttpServletRequest request) {
         return criarErro(HttpStatus.BAD_REQUEST, "Parametro invalido", request, List.of("Valor invalido para " + exception.getName()));
     }
 
-    private ResponseEntity<ErroResponse> criarErro(
+    private ResponseEntity<ErrorResponse> criarErro(
             HttpStatus status,
             String mensagem,
             HttpServletRequest request,
@@ -90,7 +90,7 @@ public class GlobalExceptionHandler {
                 correlationKey,
                 mensagem
         );
-        ErroResponse response = new ErroResponse(
+        ErrorResponse response = new ErrorResponse(
                 Instant.now(),
                 status.value(),
                 status.getReasonPhrase(),

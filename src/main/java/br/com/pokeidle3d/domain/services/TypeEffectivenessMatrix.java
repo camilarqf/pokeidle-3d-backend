@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.services;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 
 import java.math.BigDecimal;
@@ -151,30 +151,30 @@ public final class TypeEffectivenessMatrix {
 
     private static void validateEffectivenessInput(PokemonType attackType, List<PokemonType> defenseTypes) {
         if (attackType == null) {
-            throw new ValidacaoDominioException("Tipo atacante e obrigatorio");
+            throw new DomainValidationException("Tipo atacante e obrigatorio");
         }
 
         if (defenseTypes == null) {
-            throw new ValidacaoDominioException("Tipos defensores sao obrigatorios");
+            throw new DomainValidationException("Tipos defensores sao obrigatorios");
         }
 
         if (defenseTypes.isEmpty()) {
-            throw new ValidacaoDominioException("Deve haver ao menos um tipo defensor");
+            throw new DomainValidationException("Deve haver ao menos um tipo defensor");
         }
 
         if (defenseTypes.size() > 2) {
-            throw new ValidacaoDominioException("Pokemon defensor deve ter no maximo dois tipos");
+            throw new DomainValidationException("Pokemon defensor deve ter no maximo dois tipos");
         }
 
         EnumSet<PokemonType> uniqueDefenseTypes = EnumSet.noneOf(PokemonType.class);
 
         for (PokemonType defenseType : defenseTypes) {
             if (defenseType == null) {
-                throw new ValidacaoDominioException("Tipo defensor nao pode ser nulo");
+                throw new DomainValidationException("Tipo defensor nao pode ser nulo");
             }
 
             if (!uniqueDefenseTypes.add(defenseType)) {
-                throw new ValidacaoDominioException("Tipos defensores nao podem ser duplicados");
+                throw new DomainValidationException("Tipos defensores nao podem ser duplicados");
             }
         }
     }

@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.services;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +65,7 @@ class DamageCalculatorTest {
     @Test
     void deveLancarExcecaoQuandoInputForNulo() {
         assertThatThrownBy(() -> calculator.calculateBaseDamage(null))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("calculo de dano");
     }
 
@@ -79,7 +79,7 @@ class DamageCalculatorTest {
         );
 
         assertThatThrownBy(() -> calculator.calculateBaseDamage(input))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("limite inteiro");
     }
 
@@ -267,28 +267,28 @@ class DamageCalculatorTest {
     @Test
     void deveLancarExcecaoQuandoLevelForMenorOuIgualAZero() {
         assertThatThrownBy(() -> input(0, 40, 49, 49))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Nivel do atacante");
     }
 
     @Test
     void deveLancarExcecaoQuandoMovePowerForMenorOuIgualAZero() {
         assertThatThrownBy(() -> input(5, 0, 49, 49))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Power do movimento");
     }
 
     @Test
     void deveLancarExcecaoQuandoAttackForMenorOuIgualAZero() {
         assertThatThrownBy(() -> input(5, 40, 0, 49))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Ataque");
     }
 
     @Test
     void deveLancarExcecaoQuandoDefenseForMenorOuIgualAZero() {
         assertThatThrownBy(() -> input(5, 40, 49, 0))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Defesa");
     }
 
@@ -296,7 +296,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoMoveTypeForNulo() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, null,
                 List.of(PokemonType.FIRE), List.of(PokemonType.NORMAL)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipo do movimento");
     }
 
@@ -304,7 +304,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoTiposDoAtacanteForemNulos() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 null, List.of(PokemonType.NORMAL)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipos do atacante");
     }
 
@@ -312,7 +312,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoTiposDoAtacanteEstiveremVazios() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 List.of(), List.of(PokemonType.NORMAL)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("ao menos um tipo do atacante");
     }
 
@@ -320,7 +320,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoHouverMaisDeDoisTiposDoAtacante() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 List.of(PokemonType.FIRE, PokemonType.FLYING, PokemonType.DRAGON), List.of(PokemonType.NORMAL)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("maximo dois tipos");
     }
 
@@ -328,7 +328,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoHouverTipoDoAtacanteNulo() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 Collections.singletonList(null), List.of(PokemonType.NORMAL)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipo do atacante");
     }
 
@@ -336,7 +336,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoHouverTiposDoAtacanteDuplicados() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 List.of(PokemonType.FIRE, PokemonType.FIRE), List.of(PokemonType.NORMAL)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("duplicados");
     }
 
@@ -344,7 +344,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoTiposDoDefensorForemNulos() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 List.of(PokemonType.FIRE), null))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipos defensores");
     }
 
@@ -352,7 +352,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoTiposDoDefensorEstiveremVazios() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 List.of(PokemonType.FIRE), List.of()))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("ao menos um tipo defensor");
     }
 
@@ -360,7 +360,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoHouverMaisDeDoisTiposDoDefensor() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 List.of(PokemonType.FIRE), List.of(PokemonType.FIRE, PokemonType.FLYING, PokemonType.DRAGON)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("maximo dois tipos");
     }
 
@@ -368,7 +368,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoHouverTipoDoDefensorNulo() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 List.of(PokemonType.FIRE), Collections.singletonList(null)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipo defensor");
     }
 
@@ -376,7 +376,7 @@ class DamageCalculatorTest {
     void deveLancarExcecaoQuandoHouverTiposDoDefensorDuplicados() {
         assertThatThrownBy(() -> new DamageCalculationInput(5, 40, 49, 49, PokemonType.FIRE,
                 List.of(PokemonType.FIRE), List.of(PokemonType.FIRE, PokemonType.FIRE)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("duplicados");
     }
 
@@ -393,7 +393,7 @@ class DamageCalculatorTest {
     @Test
     void deveLancarExcecaoQuandoProviderDeFatorAleatorioForNulo() {
         assertThatThrownBy(() -> new DamageCalculator(null))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Provider de fator aleatorio");
     }
 

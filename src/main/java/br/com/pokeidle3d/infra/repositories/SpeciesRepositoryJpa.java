@@ -1,10 +1,10 @@
 package br.com.pokeidle3d.infra.repositories;
 
-import br.com.pokeidle3d.application.events.UnidadeTrabalhoEventosDominio;
+import br.com.pokeidle3d.application.events.DomainEventUnitOfWork;
 import br.com.pokeidle3d.domain.entities.Species;
-import br.com.pokeidle3d.domain.exceptions.SpeciesDuplicadaException;
+import br.com.pokeidle3d.domain.exceptions.DuplicateSpeciesException;
 import br.com.pokeidle3d.domain.repositories.SpeciesRepository;
-import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
+import br.com.pokeidle3d.domain.valueobjects.PaginatedResult;
 import br.com.pokeidle3d.infra.mappers.SpeciesJpaMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -19,12 +19,12 @@ public class SpeciesRepositoryJpa implements SpeciesRepository {
 
     private final SpringDataSpeciesJpaRepository repository;
     private final SpeciesJpaMapper mapper;
-    private final UnidadeTrabalhoEventosDominio unidadeTrabalhoEventosDominio;
+    private final DomainEventUnitOfWork unidadeTrabalhoEventosDominio;
 
     public SpeciesRepositoryJpa(
             SpringDataSpeciesJpaRepository repository,
             SpeciesJpaMapper mapper,
-            UnidadeTrabalhoEventosDominio unidadeTrabalhoEventosDominio
+            DomainEventUnitOfWork unidadeTrabalhoEventosDominio
     ) {
         this.repository = repository;
         this.mapper = mapper;
@@ -38,7 +38,7 @@ public class SpeciesRepositoryJpa implements SpeciesRepository {
             unidadeTrabalhoEventosDominio.registrar(species, speciesSalva.getId());
             return speciesSalva;
         } catch (DataIntegrityViolationException exception) {
-            throw new SpeciesDuplicadaException("Ja existe especie com este numero da Pokedex ou nome");
+            throw new DuplicateSpeciesException("Ja existe especie com este numero da Pokedex ou nome");
         }
     }
 
@@ -53,10 +53,10 @@ public class SpeciesRepositoryJpa implements SpeciesRepository {
     }
 
     @Override
-    public ResultadoPaginado<Species> listar(int pagina, int tamanho) {
+    public PaginatedResult<Species> listar(int pagina, int tamanho) {
         PageRequest pageRequest = PageRequest.of(pagina, tamanho, Sort.by("pokedexNumber").ascending());
         Page<Species> page = repository.findAll(pageRequest).map(mapper::paraDominio);
-        return new ResultadoPaginado<>(
+        return new PaginatedResult<>(
                 page.getContent(),
                 page.getTotalElements(),
                 page.getTotalPages(),

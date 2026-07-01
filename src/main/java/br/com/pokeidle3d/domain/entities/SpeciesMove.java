@@ -1,8 +1,8 @@
 package br.com.pokeidle3d.domain.entities;
 
-import br.com.pokeidle3d.domain.events.MoveAdicionadoAoMovesetSpeciesEvent;
-import br.com.pokeidle3d.domain.events.MoveRemovidoDoMovesetSpeciesEvent;
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.events.MoveAddedToSpeciesMovesetEvent;
+import br.com.pokeidle3d.domain.events.MoveRemovedFromSpeciesMovesetEvent;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.CorrelationKey;
 import br.com.pokeidle3d.domain.valueobjects.LevelLearnedAt;
 import br.com.pokeidle3d.domain.valueobjects.MoveLearnMethod;
@@ -47,7 +47,7 @@ public class SpeciesMove extends AggregateEventManager {
             CorrelationKey correlationKey
     ) {
         SpeciesMove speciesMove = new SpeciesMove(null, speciesId, moveId, learnMethod, levelLearnedAt, null, null);
-        speciesMove.registrarEvento(MoveAdicionadoAoMovesetSpeciesEvent.criar(
+        speciesMove.registrarEvento(MoveAddedToSpeciesMovesetEvent.criar(
                 correlationKey,
                 speciesMove.getSpeciesId(),
                 speciesMove.getMoveId(),
@@ -70,7 +70,7 @@ public class SpeciesMove extends AggregateEventManager {
     }
 
     public void registrarRemocao(CorrelationKey correlationKey) {
-        registrarEvento(MoveRemovidoDoMovesetSpeciesEvent.criar(
+        registrarEvento(MoveRemovedFromSpeciesMovesetEvent.criar(
                 correlationKey,
                 speciesId,
                 moveId,
@@ -81,19 +81,19 @@ public class SpeciesMove extends AggregateEventManager {
 
     private static void validar(Long speciesId, Long moveId, MoveLearnMethod learnMethod, Integer levelLearnedAt) {
         if (speciesId == null || speciesId <= 0) {
-            throw new ValidacaoDominioException("SpeciesId deve ser positivo");
+            throw new DomainValidationException("SpeciesId deve ser positivo");
         }
         if (moveId == null || moveId <= 0) {
-            throw new ValidacaoDominioException("MoveId deve ser positivo");
+            throw new DomainValidationException("MoveId deve ser positivo");
         }
         if (learnMethod == null) {
-            throw new ValidacaoDominioException("Metodo de aprendizado e obrigatorio");
+            throw new DomainValidationException("Metodo de aprendizado e obrigatorio");
         }
         if (learnMethod == MoveLearnMethod.LEVEL_UP) {
             LevelLearnedAt.obrigatorioParaLevelUp(learnMethod, levelLearnedAt);
         }
         if (learnMethod != MoveLearnMethod.LEVEL_UP && levelLearnedAt != null && levelLearnedAt <= 0) {
-            throw new ValidacaoDominioException("LevelLearnedAt deve ser maior que zero");
+            throw new DomainValidationException("LevelLearnedAt deve ser maior que zero");
         }
     }
 

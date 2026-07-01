@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.services;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import org.junit.jupiter.api.Test;
 
@@ -52,21 +52,21 @@ class StabCalculatorTest {
     @Test
     void deveLancarExcecaoQuandoMoveTypeForNulo() {
         assertThatThrownBy(() -> calculator.calculate(null, List.of(PokemonType.FIRE)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipo do movimento");
     }
 
     @Test
     void deveLancarExcecaoQuandoTiposDoAtacanteForemNulos() {
         assertThatThrownBy(() -> calculator.calculate(PokemonType.FIRE, null))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipos do atacante");
     }
 
     @Test
     void deveLancarExcecaoQuandoTiposDoAtacanteEstiveremVazios() {
         assertThatThrownBy(() -> calculator.calculate(PokemonType.FIRE, List.of()))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("ao menos um tipo do atacante");
     }
 
@@ -74,21 +74,21 @@ class StabCalculatorTest {
     void deveLancarExcecaoQuandoHouverMaisDeDoisTiposDoAtacante() {
         assertThatThrownBy(() -> calculator.calculate(PokemonType.FIRE,
                 List.of(PokemonType.FIRE, PokemonType.FLYING, PokemonType.DRAGON)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("maximo dois tipos");
     }
 
     @Test
     void deveLancarExcecaoQuandoHouverTipoDoAtacanteNulo() {
         assertThatThrownBy(() -> calculator.calculate(PokemonType.FIRE, Collections.singletonList(null)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipo do atacante");
     }
 
     @Test
     void deveLancarExcecaoQuandoHouverTiposDoAtacanteDuplicados() {
         assertThatThrownBy(() -> calculator.calculate(PokemonType.FIRE, List.of(PokemonType.FIRE, PokemonType.FIRE)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("duplicados");
     }
 

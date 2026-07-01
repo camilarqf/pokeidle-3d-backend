@@ -3,7 +3,7 @@ package br.com.pokeidle3d.infra.seed;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import br.com.pokeidle3d.infra.integrations.pokemon3dapi.Pokemon3dApiClient;
 import br.com.pokeidle3d.infra.integrations.pokemon3dapi.Pokemon3dAssetStorage;
-import br.com.pokeidle3d.infra.integrations.pokemon3dapi.Pokemon3dApiIntegracaoException;
+import br.com.pokeidle3d.infra.integrations.pokemon3dapi.Pokemon3dApiIntegrationException;
 import br.com.pokeidle3d.infra.integrations.pokemon3dapi.Pokemon3dModelRef;
 import br.com.pokeidle3d.infra.persistence.SpeciesJpaEntity;
 import br.com.pokeidle3d.infra.repositories.SpringDataSpeciesJpaRepository;
@@ -47,7 +47,7 @@ class Pokemon3dPrototypeAssetImporterTest {
 
         when(repository.findByNameIgnoreCase("bulbasaur")).thenReturn(Optional.of(species(1L, 1, "bulbasaur")));
         when(repository.findByNameIgnoreCase("charmander")).thenReturn(Optional.of(species(2L, 4, "charmander")));
-        when(client.buscarModeloRegular(1)).thenThrow(new Pokemon3dApiIntegracaoException("erro simulado"));
+        when(client.buscarModeloRegular(1)).thenThrow(new Pokemon3dApiIntegrationException("erro simulado"));
         when(client.buscarModeloRegular(4)).thenReturn(new Pokemon3dModelRef(4, "Charmander", "regular", URI.create("https://assets.test/4.glb")));
         when(client.baixarModelo(URI.create("https://assets.test/4.glb"))).thenReturn(new byte[]{4});
         when(storage.salvarModeloRegular(4, new byte[]{4})).thenReturn("storage/assets/3d/pokemon/regular/4.glb");

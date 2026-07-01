@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.services;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 
 import java.util.EnumSet;
@@ -44,13 +44,13 @@ public record DamageCalculationInput(
 
     private static void validatePositive(int value, String fieldName) {
         if (value <= 0) {
-            throw new ValidacaoDominioException(fieldName + " deve ser maior que zero");
+            throw new DomainValidationException(fieldName + " deve ser maior que zero");
         }
     }
 
     private static void validateMoveType(PokemonType moveType) {
         if (moveType == null) {
-            throw new ValidacaoDominioException("Tipo do movimento e obrigatorio");
+            throw new DomainValidationException("Tipo do movimento e obrigatorio");
         }
     }
 
@@ -63,26 +63,26 @@ public record DamageCalculationInput(
             String duplicatedMessage
     ) {
         if (types == null) {
-            throw new ValidacaoDominioException(nullMessage);
+            throw new DomainValidationException(nullMessage);
         }
 
         if (types.isEmpty()) {
-            throw new ValidacaoDominioException(emptyMessage);
+            throw new DomainValidationException(emptyMessage);
         }
 
         if (types.size() > 2) {
-            throw new ValidacaoDominioException(tooManyMessage);
+            throw new DomainValidationException(tooManyMessage);
         }
 
         EnumSet<PokemonType> uniqueTypes = EnumSet.noneOf(PokemonType.class);
 
         for (PokemonType type : types) {
             if (type == null) {
-                throw new ValidacaoDominioException(nullTypeMessage);
+                throw new DomainValidationException(nullTypeMessage);
             }
 
             if (!uniqueTypes.add(type)) {
-                throw new ValidacaoDominioException(duplicatedMessage);
+                throw new DomainValidationException(duplicatedMessage);
             }
         }
     }

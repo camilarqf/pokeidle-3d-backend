@@ -21,7 +21,7 @@ class PokeApiClientTest {
                 .andRespond(withStatus(HttpStatus.NOT_FOUND));
 
         assertThatThrownBy(() -> client.buscarPokemon("missingno"))
-                .isInstanceOf(PokeApiPokemonNaoEncontradoException.class)
+                .isInstanceOf(PokeApiPokemonNotFoundException.class)
                 .hasMessageContaining("missingno");
 
         server.verify();

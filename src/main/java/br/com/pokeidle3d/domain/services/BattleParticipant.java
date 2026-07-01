@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.services;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 
 import java.util.UUID;
 
@@ -12,11 +12,11 @@ public record BattleParticipant(
 
     public BattleParticipant {
         if (id == null) {
-            throw new ValidacaoDominioException("Id do participante da batalha e obrigatorio");
+            throw new DomainValidationException("Id do participante da batalha e obrigatorio");
         }
 
         if (speed < 0) {
-            throw new ValidacaoDominioException("Speed do participante da batalha nao pode ser negativa");
+            throw new DomainValidationException("Speed do participante da batalha nao pode ser negativa");
         }
     }
 }

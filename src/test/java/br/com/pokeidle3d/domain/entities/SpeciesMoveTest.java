@@ -1,8 +1,8 @@
 package br.com.pokeidle3d.domain.entities;
 
-import br.com.pokeidle3d.domain.events.MoveAdicionadoAoMovesetSpeciesEvent;
-import br.com.pokeidle3d.domain.events.MoveRemovidoDoMovesetSpeciesEvent;
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.events.MoveAddedToSpeciesMovesetEvent;
+import br.com.pokeidle3d.domain.events.MoveRemovedFromSpeciesMovesetEvent;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.CorrelationKey;
 import br.com.pokeidle3d.domain.valueobjects.MoveLearnMethod;
 import org.junit.jupiter.api.Test;
@@ -23,9 +23,9 @@ class SpeciesMoveTest {
         assertThat(speciesMove.getLearnMethod()).isEqualTo(MoveLearnMethod.LEVEL_UP);
         assertThat(speciesMove.getLevelLearnedAt()).isEqualTo(7);
         assertThat(speciesMove.events()).hasSize(1);
-        assertThat(speciesMove.events().get(0)).isInstanceOf(MoveAdicionadoAoMovesetSpeciesEvent.class);
+        assertThat(speciesMove.events().get(0)).isInstanceOf(MoveAddedToSpeciesMovesetEvent.class);
 
-        MoveAdicionadoAoMovesetSpeciesEvent event = (MoveAdicionadoAoMovesetSpeciesEvent) speciesMove.events().get(0);
+        MoveAddedToSpeciesMovesetEvent event = (MoveAddedToSpeciesMovesetEvent) speciesMove.events().get(0);
         assertThat(event.correlationKey()).isEqualTo(correlationKey);
         assertThat(event.speciesId()).isEqualTo(1L);
         assertThat(event.moveId()).isEqualTo(2L);
@@ -43,7 +43,7 @@ class SpeciesMoveTest {
     @Test
     void naoDeveCriarLevelUpSemLevel() {
         assertThatThrownBy(() -> SpeciesMove.adicionar(1L, 2L, MoveLearnMethod.LEVEL_UP, null, CorrelationKey.gerar()))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("LevelLearnedAt");
     }
 
@@ -55,9 +55,9 @@ class SpeciesMoveTest {
         speciesMove.registrarRemocao(correlationKey);
 
         assertThat(speciesMove.events()).hasSize(1);
-        assertThat(speciesMove.events().get(0)).isInstanceOf(MoveRemovidoDoMovesetSpeciesEvent.class);
+        assertThat(speciesMove.events().get(0)).isInstanceOf(MoveRemovedFromSpeciesMovesetEvent.class);
 
-        MoveRemovidoDoMovesetSpeciesEvent event = (MoveRemovidoDoMovesetSpeciesEvent) speciesMove.events().get(0);
+        MoveRemovedFromSpeciesMovesetEvent event = (MoveRemovedFromSpeciesMovesetEvent) speciesMove.events().get(0);
         assertThat(event.correlationKey()).isEqualTo(correlationKey);
         assertThat(event.speciesId()).isEqualTo(1L);
         assertThat(event.moveId()).isEqualTo(2L);

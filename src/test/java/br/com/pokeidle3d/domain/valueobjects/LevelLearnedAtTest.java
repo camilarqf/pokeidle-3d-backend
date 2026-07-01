@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.valueobjects;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,7 +18,7 @@ class LevelLearnedAtTest {
     @Test
     void naoDeveCriarLevelMenorOuIgualAZero() {
         assertThatThrownBy(() -> new LevelLearnedAt(0))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("LevelLearnedAt");
     }
 }

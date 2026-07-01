@@ -1,7 +1,7 @@
 package br.com.pokeidle3d.domain.entities;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
-import br.com.pokeidle3d.domain.events.SpeciesCriadaEvent;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
+import br.com.pokeidle3d.domain.events.SpeciesCreatedEvent;
 import br.com.pokeidle3d.domain.valueobjects.CorrelationKey;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ class SpeciesTest {
                 "sprite",
                 "modelo"
         ))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("baseHp");
     }
 
@@ -94,9 +94,9 @@ class SpeciesTest {
         );
 
         assertThat(species.eventosDominio()).hasSize(1);
-        assertThat(species.eventosDominio().get(0)).isInstanceOf(SpeciesCriadaEvent.class);
+        assertThat(species.eventosDominio().get(0)).isInstanceOf(SpeciesCreatedEvent.class);
 
-        SpeciesCriadaEvent event = (SpeciesCriadaEvent) species.eventosDominio().get(0);
+        SpeciesCreatedEvent event = (SpeciesCreatedEvent) species.eventosDominio().get(0);
         assertThat(event.eventId()).isNotNull();
         assertThat(event.occurredAt()).isNotNull();
         assertThat(event.correlationKey()).isEqualTo(correlationKey);

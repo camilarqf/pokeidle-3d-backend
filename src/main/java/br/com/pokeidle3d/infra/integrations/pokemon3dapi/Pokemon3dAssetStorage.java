@@ -23,7 +23,7 @@ public class Pokemon3dAssetStorage {
             Files.write(target, bytes);
             return target.normalize().toString().replace('\\', '/');
         } catch (IOException exception) {
-            throw new Pokemon3dApiIntegracaoException("Erro ao salvar modelo 3D local: " + target, exception);
+            throw new Pokemon3dApiIntegrationException("Erro ao salvar modelo 3D local: " + target, exception);
         }
     }
 }

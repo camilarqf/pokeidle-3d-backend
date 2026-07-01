@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.services;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 
 public final class TurnOrderCalculator {
 
@@ -12,7 +12,7 @@ public final class TurnOrderCalculator {
 
     public TurnOrderCalculator(TurnOrderRandomProvider randomProvider) {
         if (randomProvider == null) {
-            throw new ValidacaoDominioException("Provider aleatorio de ordem de turno e obrigatorio");
+            throw new DomainValidationException("Provider aleatorio de ordem de turno e obrigatorio");
         }
 
         this.randomProvider = randomProvider;
@@ -20,11 +20,11 @@ public final class TurnOrderCalculator {
 
     public TurnOrder determine(BattleParticipant first, BattleParticipant second) {
         if (first == null) {
-            throw new ValidacaoDominioException("Primeiro participante da batalha e obrigatorio");
+            throw new DomainValidationException("Primeiro participante da batalha e obrigatorio");
         }
 
         if (second == null) {
-            throw new ValidacaoDominioException("Segundo participante da batalha e obrigatorio");
+            throw new DomainValidationException("Segundo participante da batalha e obrigatorio");
         }
 
         if (first.speed() > second.speed()) {

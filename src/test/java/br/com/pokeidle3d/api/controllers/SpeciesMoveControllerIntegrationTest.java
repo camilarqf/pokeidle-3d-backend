@@ -59,7 +59,7 @@ class SpeciesMoveControllerIntegrationTest {
         assertThat(body.get("id").asLong()).isPositive();
         assertThat(eventJpaRepository.findAll())
                 .anySatisfy(evento -> {
-                    assertThat(evento.getFullName()).endsWith("MoveAdicionadoAoMovesetSpeciesEvent");
+                    assertThat(evento.getFullName()).endsWith("MoveAddedToSpeciesMovesetEvent");
                     assertThat(evento.getAggregateType()).isEqualTo("SpeciesMove");
                     assertThat(evento.getPayload()).contains("moveset-add-integration-key");
                 });
@@ -83,7 +83,7 @@ class SpeciesMoveControllerIntegrationTest {
 
         assertThat(eventJpaRepository.findAll())
                 .anySatisfy(evento -> {
-                    assertThat(evento.getFullName()).endsWith("MoveRemovidoDoMovesetSpeciesEvent");
+                    assertThat(evento.getFullName()).endsWith("MoveRemovedFromSpeciesMovesetEvent");
                     assertThat(evento.getPayload()).contains("moveset-remove-integration-key");
                 });
 

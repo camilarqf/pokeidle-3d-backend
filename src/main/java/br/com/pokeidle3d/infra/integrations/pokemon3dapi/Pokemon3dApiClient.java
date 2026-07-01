@@ -22,7 +22,7 @@ public class Pokemon3dApiClient {
     public Pokemon3dModelRef buscarModeloRegular(Integer pokedexNumber) {
         Pokemon3dCatalogResponse catalog = buscarCatalogo();
         if (catalog.pokemon() == null) {
-            throw new Pokemon3dModeloNaoEncontradoException(pokedexNumber);
+            throw new Pokemon3dModelNotFoundException(pokedexNumber);
         }
 
         return catalog.pokemon()
@@ -33,7 +33,7 @@ public class Pokemon3dApiClient {
                 .filter(form -> form.model() != null && form.model().toLowerCase().endsWith(".glb"))
                 .min(Comparator.comparing(Pokemon3dFormResponse::name))
                 .map(form -> new Pokemon3dModelRef(pokedexNumber, form.name(), form.formName(), URI.create(form.model())))
-                .orElseThrow(() -> new Pokemon3dModeloNaoEncontradoException(pokedexNumber));
+                .orElseThrow(() -> new Pokemon3dModelNotFoundException(pokedexNumber));
     }
 
     public byte[] baixarModelo(URI modelUri) {
@@ -44,11 +44,11 @@ public class Pokemon3dApiClient {
                     .retrieve()
                     .body(byte[].class);
             if (bytes == null || bytes.length == 0) {
-                throw new Pokemon3dApiIntegracaoException("Modelo 3D vazio: " + modelUri);
+                throw new Pokemon3dApiIntegrationException("Modelo 3D vazio: " + modelUri);
             }
             return bytes;
         } catch (RestClientException exception) {
-            throw new Pokemon3dApiIntegracaoException("Erro ao baixar modelo 3D: " + modelUri, exception);
+            throw new Pokemon3dApiIntegrationException("Erro ao baixar modelo 3D: " + modelUri, exception);
         }
     }
 
@@ -60,11 +60,11 @@ public class Pokemon3dApiClient {
                     .retrieve()
                     .body(Pokemon3dCatalogResponse.class);
             if (response == null) {
-                throw new Pokemon3dApiIntegracaoException("Catalogo vazio da Pokemon-3D-api");
+                throw new Pokemon3dApiIntegrationException("Catalogo vazio da Pokemon-3D-api");
             }
             return response;
         } catch (RestClientException exception) {
-            throw new Pokemon3dApiIntegracaoException("Erro ao consultar catalogo da Pokemon-3D-api", exception);
+            throw new Pokemon3dApiIntegrationException("Erro ao consultar catalogo da Pokemon-3D-api", exception);
         }
     }
 }

@@ -1,7 +1,7 @@
 package br.com.pokeidle3d.domain.entities;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
-import br.com.pokeidle3d.domain.events.SpeciesCriadaEvent;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
+import br.com.pokeidle3d.domain.events.SpeciesCreatedEvent;
 import br.com.pokeidle3d.domain.valueobjects.CorrelationKey;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 
@@ -124,7 +124,7 @@ public class Species extends AggregateEventManager {
                 null,
                 null
         );
-        species.registrarEvento(SpeciesCriadaEvent.criar(
+        species.registrarEvento(SpeciesCreatedEvent.criar(
                 correlationKey,
                 species.getPokedexNumber(),
                 species.getName(),
@@ -182,13 +182,13 @@ public class Species extends AggregateEventManager {
             Integer baseSpeed
     ) {
         if (pokedexNumber == null || pokedexNumber <= 0) {
-            throw new ValidacaoDominioException("Numero da Pokedex deve ser positivo");
+            throw new DomainValidationException("Numero da Pokedex deve ser positivo");
         }
         if (name == null || name.isBlank()) {
-            throw new ValidacaoDominioException("Nome da especie e obrigatorio");
+            throw new DomainValidationException("Nome da especie e obrigatorio");
         }
         if (primaryType == null) {
-            throw new ValidacaoDominioException("Tipo primario e obrigatorio");
+            throw new DomainValidationException("Tipo primario e obrigatorio");
         }
         validarStat("baseHp", baseHp);
         validarStat("baseAttack", baseAttack);
@@ -200,7 +200,7 @@ public class Species extends AggregateEventManager {
 
     private static void validarStat(String nome, Integer valor) {
         if (valor == null || valor < 0) {
-            throw new ValidacaoDominioException(nome + " nao pode ser negativo");
+            throw new DomainValidationException(nome + " nao pode ser negativo");
         }
     }
 
