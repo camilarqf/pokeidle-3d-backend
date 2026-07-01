@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.entities;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.MoveCategory;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 
@@ -76,22 +76,22 @@ public class Move extends AggregateEventManager {
             Integer pp
     ) {
         if (name == null || name.isBlank()) {
-            throw new ValidacaoDominioException("Nome do movimento e obrigatorio");
+            throw new DomainValidationException("Nome do movimento e obrigatorio");
         }
         if (type == null) {
-            throw new ValidacaoDominioException("Tipo do movimento e obrigatorio");
+            throw new DomainValidationException("Tipo do movimento e obrigatorio");
         }
         if (category == null) {
-            throw new ValidacaoDominioException("Categoria do movimento e obrigatoria");
+            throw new DomainValidationException("Categoria do movimento e obrigatoria");
         }
         if (pp == null || pp <= 0) {
-            throw new ValidacaoDominioException("PP deve ser maior que zero");
+            throw new DomainValidationException("PP deve ser maior que zero");
         }
         if (power != null && power < 0) {
-            throw new ValidacaoDominioException("Power nao pode ser negativo");
+            throw new DomainValidationException("Power nao pode ser negativo");
         }
         if (accuracy != null && (accuracy < 1 || accuracy > 100)) {
-            throw new ValidacaoDominioException("Accuracy deve estar entre 1 e 100");
+            throw new DomainValidationException("Accuracy deve estar entre 1 e 100");
         }
     }
 

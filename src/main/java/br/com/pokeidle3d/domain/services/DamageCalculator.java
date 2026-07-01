@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.services;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -18,7 +18,7 @@ public final class DamageCalculator {
 
     public DamageCalculator(DamageRandomFactorProvider randomFactorProvider) {
         if (randomFactorProvider == null) {
-            throw new ValidacaoDominioException("Provider de fator aleatorio de dano e obrigatorio");
+            throw new DomainValidationException("Provider de fator aleatorio de dano e obrigatorio");
         }
 
         this.randomFactorProvider = randomFactorProvider;
@@ -45,7 +45,7 @@ public final class DamageCalculator {
 
     public int calculateBaseDamage(DamageCalculationInput input) {
         if (input == null) {
-            throw new ValidacaoDominioException("Dados do calculo de dano sao obrigatorios");
+            throw new DomainValidationException("Dados do calculo de dano sao obrigatorios");
         }
 
         BigInteger damage = BigInteger.valueOf((2L * input.attackerLevel()) / 5 + 2)
@@ -60,7 +60,7 @@ public final class DamageCalculator {
 
     private int toIntDamage(BigDecimal damage) {
         if (damage.compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) > 0) {
-            throw new ValidacaoDominioException("Dano calculado excede o limite inteiro suportado");
+            throw new DomainValidationException("Dano calculado excede o limite inteiro suportado");
         }
 
         return damage.intValue();
@@ -68,7 +68,7 @@ public final class DamageCalculator {
 
     private int toIntDamage(BigInteger damage) {
         if (damage.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
-            throw new ValidacaoDominioException("Dano calculado excede o limite inteiro suportado");
+            throw new DomainValidationException("Dano calculado excede o limite inteiro suportado");
         }
 
         return damage.intValue();

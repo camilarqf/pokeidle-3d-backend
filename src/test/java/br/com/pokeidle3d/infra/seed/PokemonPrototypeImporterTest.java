@@ -3,7 +3,7 @@ package br.com.pokeidle3d.infra.seed;
 import br.com.pokeidle3d.domain.entities.Species;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import br.com.pokeidle3d.infra.integrations.pokeapi.PokeApiClient;
-import br.com.pokeidle3d.infra.integrations.pokeapi.PokeApiIntegracaoException;
+import br.com.pokeidle3d.infra.integrations.pokeapi.PokeApiIntegrationException;
 import br.com.pokeidle3d.infra.integrations.pokeapi.PokeApiPokemonResponse;
 import br.com.pokeidle3d.infra.integrations.pokeapi.PokeApiSpeciesMapper;
 import br.com.pokeidle3d.infra.mappers.SpeciesJpaMapper;
@@ -45,7 +45,7 @@ class PokemonPrototypeImporterTest {
         SpeciesJpaMapper speciesJpaMapper = new SpeciesJpaMapper();
         SpringDataSpeciesJpaRepository repository = mock(SpringDataSpeciesJpaRepository.class);
 
-        when(client.buscarPokemon("bulbasaur")).thenThrow(new PokeApiIntegracaoException("erro simulado"));
+        when(client.buscarPokemon("bulbasaur")).thenThrow(new PokeApiIntegrationException("erro simulado"));
         when(client.buscarPokemon("charmander")).thenReturn(mock(PokeApiPokemonResponse.class));
         when(mapper.paraSpecies(any())).thenReturn(species(4, "charmander"));
         when(repository.existsByPokedexNumber(4)).thenReturn(false);

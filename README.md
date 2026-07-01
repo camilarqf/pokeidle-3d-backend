@@ -179,14 +179,14 @@ O fator aleatorio nao e obtido quando existe imunidade, pois o dano deve permane
 - `defenderTypes` sem nulos;
 - `defenderTypes` sem duplicados.
 
-Entradas invalidas lancam `ValidacaoDominioException`, seguindo o padrao atual do dominio.
+Entradas invalidas lancam `DomainValidationException`, seguindo o padrao atual do dominio.
 
 ## Estrutura relevante
 
 ```text
 src/main/java/br/com/pokeidle3d/domain
 |-- exceptions
-|   `-- ValidacaoDominioException.java
+|   `-- DomainValidationException.java
 |-- services
 |   |-- DamageCalculationInput.java
 |   |-- DamageCalculator.java

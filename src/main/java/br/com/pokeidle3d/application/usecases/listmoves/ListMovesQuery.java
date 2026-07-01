@@ -1,0 +1,8 @@
+package br.com.pokeidle3d.application.usecases.listmoves;
+
+import br.com.pokeidle3d.application.bus.Query;
+import br.com.pokeidle3d.domain.entities.Move;
+import br.com.pokeidle3d.domain.valueobjects.PaginatedResult;
+
+public record ListMovesQuery(int pagina, int tamanho) implements Query<PaginatedResult<Move>> {
+}

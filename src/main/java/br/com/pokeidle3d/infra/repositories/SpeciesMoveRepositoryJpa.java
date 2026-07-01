@@ -1,8 +1,8 @@
 package br.com.pokeidle3d.infra.repositories;
 
-import br.com.pokeidle3d.application.events.UnidadeTrabalhoEventosDominio;
+import br.com.pokeidle3d.application.events.DomainEventUnitOfWork;
 import br.com.pokeidle3d.domain.entities.SpeciesMove;
-import br.com.pokeidle3d.domain.exceptions.SpeciesMoveDuplicadoException;
+import br.com.pokeidle3d.domain.exceptions.DuplicateSpeciesMoveException;
 import br.com.pokeidle3d.domain.repositories.SpeciesMoveRepository;
 import br.com.pokeidle3d.domain.valueobjects.MoveLearnMethod;
 import br.com.pokeidle3d.infra.mappers.SpeciesMoveJpaMapper;
@@ -17,12 +17,12 @@ public class SpeciesMoveRepositoryJpa implements SpeciesMoveRepository {
 
     private final SpringDataSpeciesMoveJpaRepository repository;
     private final SpeciesMoveJpaMapper mapper;
-    private final UnidadeTrabalhoEventosDominio unidadeTrabalhoEventosDominio;
+    private final DomainEventUnitOfWork unidadeTrabalhoEventosDominio;
 
     public SpeciesMoveRepositoryJpa(
             SpringDataSpeciesMoveJpaRepository repository,
             SpeciesMoveJpaMapper mapper,
-            UnidadeTrabalhoEventosDominio unidadeTrabalhoEventosDominio
+            DomainEventUnitOfWork unidadeTrabalhoEventosDominio
     ) {
         this.repository = repository;
         this.mapper = mapper;
@@ -36,7 +36,7 @@ public class SpeciesMoveRepositoryJpa implements SpeciesMoveRepository {
             unidadeTrabalhoEventosDominio.registrar(speciesMove, salvo.getId());
             return salvo;
         } catch (DataIntegrityViolationException exception) {
-            throw new SpeciesMoveDuplicadoException("Move ja associado ao moveset da especie");
+            throw new DuplicateSpeciesMoveException("Move ja associado ao moveset da especie");
         }
     }
 

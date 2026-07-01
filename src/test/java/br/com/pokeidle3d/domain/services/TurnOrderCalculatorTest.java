@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.services;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -63,7 +63,7 @@ class TurnOrderCalculatorTest {
         TurnOrderCalculator calculator = new TurnOrderCalculator(new FixedTurnOrderRandomProvider(true));
 
         assertThatThrownBy(() -> calculator.determine(null, participant("second", 100)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Primeiro participante");
     }
 
@@ -72,28 +72,28 @@ class TurnOrderCalculatorTest {
         TurnOrderCalculator calculator = new TurnOrderCalculator(new FixedTurnOrderRandomProvider(true));
 
         assertThatThrownBy(() -> calculator.determine(participant("first", 100), null))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Segundo participante");
     }
 
     @Test
     void deveLancarExcecaoQuandoSpeedForNegativa() {
         assertThatThrownBy(() -> participant("invalid", -1))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Speed");
     }
 
     @Test
     void deveLancarExcecaoQuandoIdForNulo() {
         assertThatThrownBy(() -> new BattleParticipant(null, "invalid", 100))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Id do participante");
     }
 
     @Test
     void deveLancarExcecaoQuandoProviderAleatorioForNulo() {
         assertThatThrownBy(() -> new TurnOrderCalculator(null))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Provider aleatorio");
     }
 

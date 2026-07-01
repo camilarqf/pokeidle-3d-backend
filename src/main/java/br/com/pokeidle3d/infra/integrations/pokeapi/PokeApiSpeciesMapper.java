@@ -45,28 +45,28 @@ public class PokeApiSpeciesMapper {
 
     public PokemonType converterTipo(String pokeApiType) {
         if (pokeApiType == null || pokeApiType.isBlank()) {
-            throw new PokeApiIntegracaoException("Tipo ausente na resposta da PokeAPI");
+            throw new PokeApiIntegrationException("Tipo ausente na resposta da PokeAPI");
         }
 
         try {
             return PokemonType.valueOf(pokeApiType.trim().replace("-", "_").toUpperCase());
         } catch (IllegalArgumentException exception) {
-            throw new PokeApiIntegracaoException("Tipo desconhecido na PokeAPI: " + pokeApiType, exception);
+            throw new PokeApiIntegrationException("Tipo desconhecido na PokeAPI: " + pokeApiType, exception);
         }
     }
 
     private void validarResponse(PokeApiPokemonResponse response) {
         if (response == null) {
-            throw new PokeApiIntegracaoException("Resposta nula da PokeAPI");
+            throw new PokeApiIntegrationException("Resposta nula da PokeAPI");
         }
         if (response.id() == null || response.name() == null || response.name().isBlank()) {
-            throw new PokeApiIntegracaoException("Pokemon sem id ou name na resposta da PokeAPI");
+            throw new PokeApiIntegrationException("Pokemon sem id ou name na resposta da PokeAPI");
         }
         if (response.types() == null || response.types().isEmpty()) {
-            throw new PokeApiIntegracaoException("Pokemon sem tipos na resposta da PokeAPI: " + response.name());
+            throw new PokeApiIntegrationException("Pokemon sem tipos na resposta da PokeAPI: " + response.name());
         }
         if (response.stats() == null || response.stats().isEmpty()) {
-            throw new PokeApiIntegracaoException("Pokemon sem stats na resposta da PokeAPI: " + response.name());
+            throw new PokeApiIntegrationException("Pokemon sem stats na resposta da PokeAPI: " + response.name());
         }
     }
 
@@ -76,6 +76,6 @@ public class PokeApiSpeciesMapper {
                 .filter(stat -> stat.stat() != null && statName.equals(stat.stat().name()))
                 .map(PokeApiStatResponse::base_stat)
                 .findFirst()
-                .orElseThrow(() -> new PokeApiIntegracaoException("Stat obrigatorio ausente na PokeAPI: " + statName));
+                .orElseThrow(() -> new PokeApiIntegrationException("Stat obrigatorio ausente na PokeAPI: " + statName));
     }
 }

@@ -66,14 +66,14 @@ class PokeApiSpeciesMapperTest {
         );
 
         assertThatThrownBy(() -> mapper.paraSpecies(response))
-                .isInstanceOf(PokeApiIntegracaoException.class)
+                .isInstanceOf(PokeApiIntegrationException.class)
                 .hasMessageContaining("attack");
     }
 
     @Test
     void deveFalharQuandoTipoForDesconhecido() {
         assertThatThrownBy(() -> mapper.converterTipo("shadow"))
-                .isInstanceOf(PokeApiIntegracaoException.class)
+                .isInstanceOf(PokeApiIntegrationException.class)
                 .hasMessageContaining("Tipo desconhecido");
     }
 

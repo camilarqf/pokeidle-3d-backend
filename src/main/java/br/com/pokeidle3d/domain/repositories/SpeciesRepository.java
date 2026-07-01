@@ -1,7 +1,7 @@
 package br.com.pokeidle3d.domain.repositories;
 
 import br.com.pokeidle3d.domain.entities.Species;
-import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
+import br.com.pokeidle3d.domain.valueobjects.PaginatedResult;
 
 import java.util.Optional;
 
@@ -13,7 +13,7 @@ public interface SpeciesRepository {
 
     Optional<Species> buscarPorPokedexNumber(Integer pokedexNumber);
 
-    ResultadoPaginado<Species> listar(int pagina, int tamanho);
+    PaginatedResult<Species> listar(int pagina, int tamanho);
 
     boolean existePorPokedexNumber(Integer pokedexNumber);
 

@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.valueobjects;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 
 import java.util.UUID;
 
@@ -8,7 +8,7 @@ public record CorrelationKey(String value) {
 
     public CorrelationKey {
         if (value == null || value.isBlank()) {
-            throw new ValidacaoDominioException("CorrelationKey e obrigatoria");
+            throw new DomainValidationException("CorrelationKey e obrigatoria");
         }
         value = value.trim();
     }

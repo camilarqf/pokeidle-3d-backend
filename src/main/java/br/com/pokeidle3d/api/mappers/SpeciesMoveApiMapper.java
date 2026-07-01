@@ -1,12 +1,12 @@
 package br.com.pokeidle3d.api.mappers;
 
-import br.com.pokeidle3d.api.contracts.AdicionarMoveAoMovesetSpeciesRequest;
-import br.com.pokeidle3d.api.contracts.MovesetSpeciesResponse;
+import br.com.pokeidle3d.api.contracts.AddMoveToSpeciesMovesetRequest;
+import br.com.pokeidle3d.api.contracts.SpeciesMovesetResponse;
 import br.com.pokeidle3d.api.contracts.SpeciesMoveResponse;
-import br.com.pokeidle3d.api.contracts.SpeciesPorMoveResponse;
-import br.com.pokeidle3d.application.usecases.adicionarmoveaomovesetspecies.AdicionarMoveAoMovesetSpeciesCommand;
-import br.com.pokeidle3d.application.usecases.listarmovesetdaspecies.MovesetSpeciesItem;
-import br.com.pokeidle3d.application.usecases.listarspeciespormove.SpeciesPorMoveItem;
+import br.com.pokeidle3d.api.contracts.SpeciesByMoveResponse;
+import br.com.pokeidle3d.application.usecases.addmovetospeciesmoveset.AddMoveToSpeciesMovesetCommand;
+import br.com.pokeidle3d.application.usecases.listmovesetdaspecies.SpeciesMovesetItem;
+import br.com.pokeidle3d.application.usecases.listspeciespormove.SpeciesByMoveItem;
 import br.com.pokeidle3d.domain.entities.SpeciesMove;
 import br.com.pokeidle3d.domain.valueobjects.CorrelationKey;
 import br.com.pokeidle3d.domain.valueobjects.MoveLearnMethod;
@@ -23,12 +23,12 @@ public class SpeciesMoveApiMapper {
         this.speciesApiMapper = speciesApiMapper;
     }
 
-    public AdicionarMoveAoMovesetSpeciesCommand paraCommand(
+    public AddMoveToSpeciesMovesetCommand paraCommand(
             Long speciesId,
-            AdicionarMoveAoMovesetSpeciesRequest request,
+            AddMoveToSpeciesMovesetRequest request,
             CorrelationKey correlationKey
     ) {
-        return new AdicionarMoveAoMovesetSpeciesCommand(
+        return new AddMoveToSpeciesMovesetCommand(
                 speciesId,
                 request.moveId(),
                 request.learnMethod(),
@@ -49,9 +49,9 @@ public class SpeciesMoveApiMapper {
         );
     }
 
-    public MovesetSpeciesResponse paraMovesetResponse(MovesetSpeciesItem item) {
+    public SpeciesMovesetResponse paraMovesetResponse(SpeciesMovesetItem item) {
         SpeciesMove speciesMove = item.speciesMove();
-        return new MovesetSpeciesResponse(
+        return new SpeciesMovesetResponse(
                 speciesMove.getId(),
                 speciesMove.getSpeciesId(),
                 moveApiMapper.paraResponse(item.move()),
@@ -62,9 +62,9 @@ public class SpeciesMoveApiMapper {
         );
     }
 
-    public SpeciesPorMoveResponse paraSpeciesPorMoveResponse(SpeciesPorMoveItem item) {
+    public SpeciesByMoveResponse paraSpeciesByMoveResponse(SpeciesByMoveItem item) {
         SpeciesMove speciesMove = item.speciesMove();
-        return new SpeciesPorMoveResponse(
+        return new SpeciesByMoveResponse(
                 speciesMove.getId(),
                 speciesMove.getMoveId(),
                 speciesApiMapper.paraResponse(item.species()),

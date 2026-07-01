@@ -1,12 +1,12 @@
 package br.com.pokeidle3d.domain.valueobjects;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 
 public record LevelLearnedAt(Integer value) {
 
     public LevelLearnedAt {
         if (value == null || value <= 0) {
-            throw new ValidacaoDominioException("LevelLearnedAt deve ser maior que zero");
+            throw new DomainValidationException("LevelLearnedAt deve ser maior que zero");
         }
     }
 

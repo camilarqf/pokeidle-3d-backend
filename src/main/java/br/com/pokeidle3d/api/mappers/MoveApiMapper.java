@@ -1,18 +1,18 @@
 package br.com.pokeidle3d.api.mappers;
 
-import br.com.pokeidle3d.api.contracts.CriarMoveRequest;
+import br.com.pokeidle3d.api.contracts.CreateMoveRequest;
 import br.com.pokeidle3d.api.contracts.MoveResponse;
-import br.com.pokeidle3d.api.contracts.PaginaResponse;
-import br.com.pokeidle3d.application.usecases.criarmove.CriarMoveCommand;
+import br.com.pokeidle3d.api.contracts.PageResponse;
+import br.com.pokeidle3d.application.usecases.createmove.CreateMoveCommand;
 import br.com.pokeidle3d.domain.entities.Move;
-import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
+import br.com.pokeidle3d.domain.valueobjects.PaginatedResult;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MoveApiMapper {
 
-    public CriarMoveCommand paraCommand(CriarMoveRequest request) {
-        return new CriarMoveCommand(
+    public CreateMoveCommand paraCommand(CreateMoveRequest request) {
+        return new CreateMoveCommand(
                 request.name(),
                 request.type(),
                 request.power(),
@@ -36,8 +36,8 @@ public class MoveApiMapper {
         );
     }
 
-    public PaginaResponse<MoveResponse> paraPaginaResponse(ResultadoPaginado<Move> pagina) {
-        return new PaginaResponse<>(
+    public PageResponse<MoveResponse> paraPageResponse(PaginatedResult<Move> pagina) {
+        return new PageResponse<>(
                 pagina.itens().stream().map(this::paraResponse).toList(),
                 pagina.totalItens(),
                 pagina.totalPaginas(),

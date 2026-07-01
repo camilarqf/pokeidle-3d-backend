@@ -1,20 +1,20 @@
 package br.com.pokeidle3d.api.controllers;
 
-import br.com.pokeidle3d.api.contracts.CriarMoveRequest;
+import br.com.pokeidle3d.api.contracts.CreateMoveRequest;
 import br.com.pokeidle3d.api.contracts.MoveResponse;
-import br.com.pokeidle3d.api.contracts.PaginaResponse;
-import br.com.pokeidle3d.api.contracts.SpeciesPorMoveResponse;
+import br.com.pokeidle3d.api.contracts.PageResponse;
+import br.com.pokeidle3d.api.contracts.SpeciesByMoveResponse;
 import br.com.pokeidle3d.api.mappers.MoveApiMapper;
 import br.com.pokeidle3d.api.mappers.SpeciesMoveApiMapper;
 import br.com.pokeidle3d.application.bus.CommandBus;
 import br.com.pokeidle3d.application.bus.QueryBus;
-import br.com.pokeidle3d.application.usecases.buscarmoveporid.BuscarMovePorIdQuery;
-import br.com.pokeidle3d.application.usecases.buscarmoveporname.BuscarMovePorNameQuery;
-import br.com.pokeidle3d.application.usecases.listarspeciespormove.ListarSpeciesPorMoveQuery;
-import br.com.pokeidle3d.application.usecases.listarmovesporcategory.ListarMovesPorCategoryQuery;
-import br.com.pokeidle3d.application.usecases.listarmovesportype.ListarMovesPorTypeQuery;
-import br.com.pokeidle3d.application.usecases.listarmoves.ListarMovesQuery;
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.application.usecases.findmovebyid.FindMoveByIdQuery;
+import br.com.pokeidle3d.application.usecases.findmovebyname.FindMoveByNameQuery;
+import br.com.pokeidle3d.application.usecases.listspeciespormove.ListSpeciesByMoveQuery;
+import br.com.pokeidle3d.application.usecases.listmovesporcategory.ListMovesByCategoryQuery;
+import br.com.pokeidle3d.application.usecases.listmovesportype.ListMovesByTypeQuery;
+import br.com.pokeidle3d.application.usecases.listmoves.ListMovesQuery;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.MoveCategory;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import jakarta.validation.Valid;
@@ -55,47 +55,47 @@ public class MoveController {
     }
 
     @PostMapping
-    public ResponseEntity<MoveResponse> criar(@Valid @RequestBody CriarMoveRequest request) {
+    public ResponseEntity<MoveResponse> criar(@Valid @RequestBody CreateMoveRequest request) {
         MoveResponse response = mapper.paraResponse(commandBus.dispatch(mapper.paraCommand(request)));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
     public MoveResponse buscarPorId(@PathVariable @Min(1) Long id) {
-        return mapper.paraResponse(queryBus.dispatch(new BuscarMovePorIdQuery(id)));
+        return mapper.paraResponse(queryBus.dispatch(new FindMoveByIdQuery(id)));
     }
 
     @GetMapping("/name/{name}")
     public MoveResponse buscarPorName(@PathVariable String name) {
-        return mapper.paraResponse(queryBus.dispatch(new BuscarMovePorNameQuery(name)));
+        return mapper.paraResponse(queryBus.dispatch(new FindMoveByNameQuery(name)));
     }
 
     @GetMapping
-    public PaginaResponse<MoveResponse> listar(
+    public PageResponse<MoveResponse> listar(
             @RequestParam(defaultValue = "0") @Min(0) int pagina,
             @RequestParam(defaultValue = "20") @Min(1) int tamanho,
             @RequestParam(required = false) PokemonType type,
             @RequestParam(required = false) MoveCategory category
     ) {
         if (type != null && category != null) {
-            throw new ValidacaoDominioException("Informe apenas type ou category");
+            throw new DomainValidationException("Informe apenas type ou category");
         }
         if (type != null) {
-            return mapper.paraPaginaResponse(queryBus.dispatch(new ListarMovesPorTypeQuery(type, pagina, tamanho)));
+            return mapper.paraPageResponse(queryBus.dispatch(new ListMovesByTypeQuery(type, pagina, tamanho)));
         }
         if (category != null) {
-            return mapper.paraPaginaResponse(queryBus.dispatch(new ListarMovesPorCategoryQuery(category, pagina, tamanho)));
+            return mapper.paraPageResponse(queryBus.dispatch(new ListMovesByCategoryQuery(category, pagina, tamanho)));
         }
-        return mapper.paraPaginaResponse(queryBus.dispatch(new ListarMovesQuery(pagina, tamanho)));
+        return mapper.paraPageResponse(queryBus.dispatch(new ListMovesQuery(pagina, tamanho)));
     }
 
     @GetMapping("/{moveId}/species")
-    public List<SpeciesPorMoveResponse> listarSpeciesPorMove(@PathVariable @Min(1) Long moveId) {
-        return queryBus.<List<br.com.pokeidle3d.application.usecases.listarspeciespormove.SpeciesPorMoveItem>>dispatch(
-                        new ListarSpeciesPorMoveQuery(moveId)
+    public List<SpeciesByMoveResponse> listarSpeciesPorMove(@PathVariable @Min(1) Long moveId) {
+        return queryBus.<List<br.com.pokeidle3d.application.usecases.listspeciespormove.SpeciesByMoveItem>>dispatch(
+                        new ListSpeciesByMoveQuery(moveId)
                 )
                 .stream()
-                .map(speciesMoveApiMapper::paraSpeciesPorMoveResponse)
+                .map(speciesMoveApiMapper::paraSpeciesByMoveResponse)
                 .toList();
     }
 }

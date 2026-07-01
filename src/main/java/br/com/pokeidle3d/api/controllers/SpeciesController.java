@@ -1,9 +1,9 @@
 package br.com.pokeidle3d.api.controllers;
 
-import br.com.pokeidle3d.api.contracts.CriarSpeciesRequest;
-import br.com.pokeidle3d.api.contracts.AdicionarMoveAoMovesetSpeciesRequest;
-import br.com.pokeidle3d.api.contracts.MovesetSpeciesResponse;
-import br.com.pokeidle3d.api.contracts.PaginaResponse;
+import br.com.pokeidle3d.api.contracts.CreateSpeciesRequest;
+import br.com.pokeidle3d.api.contracts.AddMoveToSpeciesMovesetRequest;
+import br.com.pokeidle3d.api.contracts.SpeciesMovesetResponse;
+import br.com.pokeidle3d.api.contracts.PageResponse;
 import br.com.pokeidle3d.api.contracts.SpeciesMoveResponse;
 import br.com.pokeidle3d.api.contracts.SpeciesResponse;
 import br.com.pokeidle3d.api.context.CorrelationKeyContext;
@@ -11,11 +11,11 @@ import br.com.pokeidle3d.api.mappers.SpeciesApiMapper;
 import br.com.pokeidle3d.api.mappers.SpeciesMoveApiMapper;
 import br.com.pokeidle3d.application.bus.CommandBus;
 import br.com.pokeidle3d.application.bus.QueryBus;
-import br.com.pokeidle3d.application.usecases.listarmovesetdaspecies.ListarMovesetDaSpeciesQuery;
-import br.com.pokeidle3d.application.usecases.removermovedomovesetspecies.RemoverMoveDoMovesetSpeciesCommand;
-import br.com.pokeidle3d.application.usecases.buscarspeciesporid.BuscarSpeciesPorIdQuery;
-import br.com.pokeidle3d.application.usecases.buscarspeciesporpokedexnumber.BuscarSpeciesPorPokedexNumberQuery;
-import br.com.pokeidle3d.application.usecases.listarspecies.ListarSpeciesQuery;
+import br.com.pokeidle3d.application.usecases.listmovesetdaspecies.ListSpeciesMovesetQuery;
+import br.com.pokeidle3d.application.usecases.removemovefromspeciesmoveset.RemoveMoveFromSpeciesMovesetCommand;
+import br.com.pokeidle3d.application.usecases.findspeciesbyid.FindSpeciesByIdQuery;
+import br.com.pokeidle3d.application.usecases.findspeciesbypokedexnumber.FindSpeciesByPokedexNumberQuery;
+import br.com.pokeidle3d.application.usecases.listspecies.ListSpeciesQuery;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
@@ -58,7 +58,7 @@ public class SpeciesController {
     }
 
     @PostMapping
-    public ResponseEntity<SpeciesResponse> criar(@Valid @RequestBody CriarSpeciesRequest request) {
+    public ResponseEntity<SpeciesResponse> criar(@Valid @RequestBody CreateSpeciesRequest request) {
         SpeciesResponse response = mapper.paraResponse(commandBus.dispatch(
                 mapper.paraCommand(request, correlationKeyContext.atual())
         ));
@@ -67,28 +67,28 @@ public class SpeciesController {
 
     @GetMapping("/{id}")
     public SpeciesResponse buscarPorId(@PathVariable @Min(1) Long id) {
-        return mapper.paraResponse(queryBus.dispatch(new BuscarSpeciesPorIdQuery(id)));
+        return mapper.paraResponse(queryBus.dispatch(new FindSpeciesByIdQuery(id)));
     }
 
     @GetMapping("/pokedex/{pokedexNumber}")
     public SpeciesResponse buscarPorPokedexNumber(@PathVariable @Min(1) Integer pokedexNumber) {
         return mapper.paraResponse(queryBus.dispatch(
-                new BuscarSpeciesPorPokedexNumberQuery(pokedexNumber)
+                new FindSpeciesByPokedexNumberQuery(pokedexNumber)
         ));
     }
 
     @GetMapping
-    public PaginaResponse<SpeciesResponse> listar(
+    public PageResponse<SpeciesResponse> listar(
             @RequestParam(defaultValue = "0") @Min(0) int pagina,
             @RequestParam(defaultValue = "20") @Min(1) int tamanho
     ) {
-        return mapper.paraPaginaResponse(queryBus.dispatch(new ListarSpeciesQuery(pagina, tamanho)));
+        return mapper.paraPageResponse(queryBus.dispatch(new ListSpeciesQuery(pagina, tamanho)));
     }
 
     @PostMapping("/{speciesId}/moves")
     public ResponseEntity<SpeciesMoveResponse> adicionarMoveAoMoveset(
             @PathVariable @Min(1) Long speciesId,
-            @Valid @RequestBody AdicionarMoveAoMovesetSpeciesRequest request
+            @Valid @RequestBody AddMoveToSpeciesMovesetRequest request
     ) {
         SpeciesMoveResponse response = speciesMoveApiMapper.paraResponse(commandBus.dispatch(
                 speciesMoveApiMapper.paraCommand(speciesId, request, correlationKeyContext.atual())
@@ -101,14 +101,14 @@ public class SpeciesController {
             @PathVariable @Min(1) Long speciesId,
             @PathVariable @Min(1) Long moveId
     ) {
-        commandBus.dispatch(new RemoverMoveDoMovesetSpeciesCommand(speciesId, moveId, correlationKeyContext.atual()));
+        commandBus.dispatch(new RemoveMoveFromSpeciesMovesetCommand(speciesId, moveId, correlationKeyContext.atual()));
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{speciesId}/moves")
-    public List<MovesetSpeciesResponse> listarMoveset(@PathVariable @Min(1) Long speciesId) {
-        return queryBus.<List<br.com.pokeidle3d.application.usecases.listarmovesetdaspecies.MovesetSpeciesItem>>dispatch(
-                        new ListarMovesetDaSpeciesQuery(speciesId)
+    public List<SpeciesMovesetResponse> listarMoveset(@PathVariable @Min(1) Long speciesId) {
+        return queryBus.<List<br.com.pokeidle3d.application.usecases.listmovesetdaspecies.SpeciesMovesetItem>>dispatch(
+                        new ListSpeciesMovesetQuery(speciesId)
                 )
                 .stream()
                 .map(speciesMoveApiMapper::paraMovesetResponse)

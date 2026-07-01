@@ -3,7 +3,7 @@ package br.com.pokeidle3d.infra.bus;
 import br.com.pokeidle3d.application.bus.Query;
 import br.com.pokeidle3d.application.bus.QueryBus;
 import br.com.pokeidle3d.application.bus.QueryHandler;
-import br.com.pokeidle3d.application.exceptions.HandlerNaoEncontradoException;
+import br.com.pokeidle3d.application.exceptions.HandlerNotFoundException;
 import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ public class SpringQueryBus implements QueryBus {
     public <R> R dispatch(Query<R> query) {
         QueryHandler<Query<R>, R> handler = (QueryHandler<Query<R>, R>) handlers.get(query.getClass());
         if (handler == null) {
-            throw new HandlerNaoEncontradoException("Query handler nao encontrado para " + query.getClass().getSimpleName());
+            throw new HandlerNotFoundException("Query handler nao encontrado para " + query.getClass().getSimpleName());
         }
         return handler.handle(query);
     }
@@ -38,7 +38,7 @@ public class SpringQueryBus implements QueryBus {
                 .resolve();
 
         if (queryType == null) {
-            throw new HandlerNaoEncontradoException("Nao foi possivel resolver query handler " + handler.getClass().getSimpleName());
+            throw new HandlerNotFoundException("Nao foi possivel resolver query handler " + handler.getClass().getSimpleName());
         }
 
         return queryType;

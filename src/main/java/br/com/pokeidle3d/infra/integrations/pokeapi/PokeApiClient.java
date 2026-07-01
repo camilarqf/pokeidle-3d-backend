@@ -24,14 +24,14 @@ public class PokeApiClient {
                     .body(PokeApiPokemonResponse.class);
 
             if (response == null) {
-                throw new PokeApiIntegracaoException("Resposta vazia da PokeAPI para: " + idOrName);
+                throw new PokeApiIntegrationException("Resposta vazia da PokeAPI para: " + idOrName);
             }
 
             return response;
         } catch (HttpClientErrorException.NotFound exception) {
-            throw new PokeApiPokemonNaoEncontradoException(idOrName);
+            throw new PokeApiPokemonNotFoundException(idOrName);
         } catch (RestClientException exception) {
-            throw new PokeApiIntegracaoException("Erro ao consultar PokeAPI para: " + idOrName, exception);
+            throw new PokeApiIntegrationException("Erro ao consultar PokeAPI para: " + idOrName, exception);
         }
     }
 }

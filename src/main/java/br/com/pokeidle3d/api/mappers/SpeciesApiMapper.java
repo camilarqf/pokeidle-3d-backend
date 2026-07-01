@@ -1,12 +1,12 @@
 package br.com.pokeidle3d.api.mappers;
 
-import br.com.pokeidle3d.api.contracts.CriarSpeciesRequest;
-import br.com.pokeidle3d.api.contracts.PaginaResponse;
+import br.com.pokeidle3d.api.contracts.CreateSpeciesRequest;
+import br.com.pokeidle3d.api.contracts.PageResponse;
 import br.com.pokeidle3d.api.contracts.SpeciesResponse;
-import br.com.pokeidle3d.application.usecases.criarspecies.CriarSpeciesCommand;
+import br.com.pokeidle3d.application.usecases.createspecies.CreateSpeciesCommand;
 import br.com.pokeidle3d.domain.entities.Species;
 import br.com.pokeidle3d.domain.valueobjects.CorrelationKey;
-import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
+import br.com.pokeidle3d.domain.valueobjects.PaginatedResult;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -19,8 +19,8 @@ public class SpeciesApiMapper {
     private static final String POKEMON_3D_ASSETS_BASE_URL =
             "https://raw.githubusercontent.com/Pokemon-3D-api/assets/main/models/opt/regular/";
 
-    public CriarSpeciesCommand paraCommand(CriarSpeciesRequest request, CorrelationKey correlationKey) {
-        return new CriarSpeciesCommand(
+    public CreateSpeciesCommand paraCommand(CreateSpeciesRequest request, CorrelationKey correlationKey) {
+        return new CreateSpeciesCommand(
                 request.pokedexNumber(),
                 request.name(),
                 request.primaryType(),
@@ -57,8 +57,8 @@ public class SpeciesApiMapper {
         );
     }
 
-    public PaginaResponse<SpeciesResponse> paraPaginaResponse(ResultadoPaginado<Species> pagina) {
-        return new PaginaResponse<>(
+    public PageResponse<SpeciesResponse> paraPageResponse(PaginatedResult<Species> pagina) {
+        return new PageResponse<>(
                 pagina.itens().stream().map(this::paraResponse).toList(),
                 pagina.totalItens(),
                 pagina.totalPaginas(),

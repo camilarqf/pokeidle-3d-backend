@@ -1,24 +1,24 @@
 package br.com.pokeidle3d.application.usecases.moveset;
 
-import br.com.pokeidle3d.application.events.UnidadeTrabalhoEventosDominio;
-import br.com.pokeidle3d.application.usecases.adicionarmoveaomovesetspecies.AdicionarMoveAoMovesetSpeciesCommand;
-import br.com.pokeidle3d.application.usecases.adicionarmoveaomovesetspecies.AdicionarMoveAoMovesetSpeciesHandler;
-import br.com.pokeidle3d.application.usecases.listarmovesetdaspecies.ListarMovesetDaSpeciesHandler;
-import br.com.pokeidle3d.application.usecases.listarmovesetdaspecies.ListarMovesetDaSpeciesQuery;
-import br.com.pokeidle3d.application.usecases.listarmovesetdaspecies.MovesetSpeciesItem;
-import br.com.pokeidle3d.application.usecases.listarspeciespormove.ListarSpeciesPorMoveHandler;
-import br.com.pokeidle3d.application.usecases.listarspeciespormove.ListarSpeciesPorMoveQuery;
-import br.com.pokeidle3d.application.usecases.listarspeciespormove.SpeciesPorMoveItem;
-import br.com.pokeidle3d.application.usecases.removermovedomovesetspecies.RemoverMoveDoMovesetSpeciesCommand;
-import br.com.pokeidle3d.application.usecases.removermovedomovesetspecies.RemoverMoveDoMovesetSpeciesHandler;
+import br.com.pokeidle3d.application.events.DomainEventUnitOfWork;
+import br.com.pokeidle3d.application.usecases.addmovetospeciesmoveset.AddMoveToSpeciesMovesetCommand;
+import br.com.pokeidle3d.application.usecases.addmovetospeciesmoveset.AddMoveToSpeciesMovesetHandler;
+import br.com.pokeidle3d.application.usecases.listmovesetdaspecies.ListSpeciesMovesetHandler;
+import br.com.pokeidle3d.application.usecases.listmovesetdaspecies.ListSpeciesMovesetQuery;
+import br.com.pokeidle3d.application.usecases.listmovesetdaspecies.SpeciesMovesetItem;
+import br.com.pokeidle3d.application.usecases.listspeciespormove.ListSpeciesByMoveHandler;
+import br.com.pokeidle3d.application.usecases.listspeciespormove.ListSpeciesByMoveQuery;
+import br.com.pokeidle3d.application.usecases.listspeciespormove.SpeciesByMoveItem;
+import br.com.pokeidle3d.application.usecases.removemovefromspeciesmoveset.RemoveMoveFromSpeciesMovesetCommand;
+import br.com.pokeidle3d.application.usecases.removemovefromspeciesmoveset.RemoveMoveFromSpeciesMovesetHandler;
 import br.com.pokeidle3d.domain.entities.IAggregate;
 import br.com.pokeidle3d.domain.entities.Move;
 import br.com.pokeidle3d.domain.entities.Species;
 import br.com.pokeidle3d.domain.entities.SpeciesMove;
 import br.com.pokeidle3d.domain.events.DomainEvent;
-import br.com.pokeidle3d.domain.events.MoveAdicionadoAoMovesetSpeciesEvent;
-import br.com.pokeidle3d.domain.events.MoveRemovidoDoMovesetSpeciesEvent;
-import br.com.pokeidle3d.domain.exceptions.SpeciesMoveDuplicadoException;
+import br.com.pokeidle3d.domain.events.MoveAddedToSpeciesMovesetEvent;
+import br.com.pokeidle3d.domain.events.MoveRemovedFromSpeciesMovesetEvent;
+import br.com.pokeidle3d.domain.exceptions.DuplicateSpeciesMoveException;
 import br.com.pokeidle3d.domain.repositories.MoveRepository;
 import br.com.pokeidle3d.domain.repositories.SpeciesMoveRepository;
 import br.com.pokeidle3d.domain.repositories.SpeciesRepository;
@@ -26,7 +26,7 @@ import br.com.pokeidle3d.domain.valueobjects.CorrelationKey;
 import br.com.pokeidle3d.domain.valueobjects.MoveCategory;
 import br.com.pokeidle3d.domain.valueobjects.MoveLearnMethod;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
-import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
+import br.com.pokeidle3d.domain.valueobjects.PaginatedResult;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -41,9 +41,9 @@ class SpeciesMoveUseCasesTest {
 
     @Test
     void deveAdicionarMoveAoMovesetPublicarEventoELimparEventos() {
-        UnidadeTrabalhoFake unidadeTrabalho = new UnidadeTrabalhoFake();
+        FakeUnitOfWork unidadeTrabalho = new FakeUnitOfWork();
         SpeciesMoveRepositoryFake speciesMoveRepository = new SpeciesMoveRepositoryFake(unidadeTrabalho);
-        AdicionarMoveAoMovesetSpeciesHandler handler = new AdicionarMoveAoMovesetSpeciesHandler(
+        AddMoveToSpeciesMovesetHandler handler = new AddMoveToSpeciesMovesetHandler(
                 new SpeciesRepositoryFake(),
                 new MoveRepositoryFake(),
                 speciesMoveRepository,
@@ -51,7 +51,7 @@ class SpeciesMoveUseCasesTest {
         );
         CorrelationKey correlationKey = new CorrelationKey("add-handler-key");
 
-        SpeciesMove salvo = handler.handle(new AdicionarMoveAoMovesetSpeciesCommand(
+        SpeciesMove salvo = handler.handle(new AddMoveToSpeciesMovesetCommand(
                 1L,
                 2L,
                 MoveLearnMethod.LEVEL_UP,
@@ -61,7 +61,7 @@ class SpeciesMoveUseCasesTest {
 
         assertThat(salvo.getId()).isEqualTo(10L);
         assertThat(unidadeTrabalho.publicouEventosPendentes).isTrue();
-        assertThat(unidadeTrabalho.eventoPublicado).isInstanceOf(MoveAdicionadoAoMovesetSpeciesEvent.class);
+        assertThat(unidadeTrabalho.eventoPublicado).isInstanceOf(MoveAddedToSpeciesMovesetEvent.class);
         assertThat(unidadeTrabalho.eventoPublicado.correlationKey()).isEqualTo(correlationKey);
         assertThat(unidadeTrabalho.eventoPublicado.aggregateId()).isEqualTo("10");
         assertThat(speciesMoveRepository.aggregateRecebido.events()).isEmpty();
@@ -69,32 +69,32 @@ class SpeciesMoveUseCasesTest {
 
     @Test
     void naoDeveAdicionarAssociacaoDuplicada() {
-        UnidadeTrabalhoFake unidadeTrabalho = new UnidadeTrabalhoFake();
+        FakeUnitOfWork unidadeTrabalho = new FakeUnitOfWork();
         SpeciesMoveRepositoryFake speciesMoveRepository = new SpeciesMoveRepositoryFake(unidadeTrabalho);
         speciesMoveRepository.duplicado = true;
-        AdicionarMoveAoMovesetSpeciesHandler handler = new AdicionarMoveAoMovesetSpeciesHandler(
+        AddMoveToSpeciesMovesetHandler handler = new AddMoveToSpeciesMovesetHandler(
                 new SpeciesRepositoryFake(),
                 new MoveRepositoryFake(),
                 speciesMoveRepository,
                 unidadeTrabalho
         );
 
-        assertThatThrownBy(() -> handler.handle(new AdicionarMoveAoMovesetSpeciesCommand(
+        assertThatThrownBy(() -> handler.handle(new AddMoveToSpeciesMovesetCommand(
                 1L,
                 2L,
                 MoveLearnMethod.TM,
                 null,
                 CorrelationKey.gerar()
         )))
-                .isInstanceOf(SpeciesMoveDuplicadoException.class)
+                .isInstanceOf(DuplicateSpeciesMoveException.class)
                 .hasMessageContaining("moveset");
     }
 
     @Test
     void deveRemoverMoveDoMovesetPublicarEventoELimparEventos() {
-        UnidadeTrabalhoFake unidadeTrabalho = new UnidadeTrabalhoFake();
+        FakeUnitOfWork unidadeTrabalho = new FakeUnitOfWork();
         SpeciesMoveRepositoryFake speciesMoveRepository = new SpeciesMoveRepositoryFake(unidadeTrabalho);
-        RemoverMoveDoMovesetSpeciesHandler handler = new RemoverMoveDoMovesetSpeciesHandler(
+        RemoveMoveFromSpeciesMovesetHandler handler = new RemoveMoveFromSpeciesMovesetHandler(
                 new SpeciesRepositoryFake(),
                 new MoveRepositoryFake(),
                 speciesMoveRepository,
@@ -102,25 +102,25 @@ class SpeciesMoveUseCasesTest {
         );
         CorrelationKey correlationKey = new CorrelationKey("remove-handler-key");
 
-        handler.handle(new RemoverMoveDoMovesetSpeciesCommand(1L, 2L, correlationKey));
+        handler.handle(new RemoveMoveFromSpeciesMovesetCommand(1L, 2L, correlationKey));
 
         assertThat(speciesMoveRepository.removeu).isTrue();
         assertThat(unidadeTrabalho.publicouEventosPendentes).isTrue();
-        assertThat(unidadeTrabalho.eventoPublicado).isInstanceOf(MoveRemovidoDoMovesetSpeciesEvent.class);
+        assertThat(unidadeTrabalho.eventoPublicado).isInstanceOf(MoveRemovedFromSpeciesMovesetEvent.class);
         assertThat(unidadeTrabalho.eventoPublicado.correlationKey()).isEqualTo(correlationKey);
         assertThat(unidadeTrabalho.eventoPublicado.aggregateId()).isEqualTo("10");
     }
 
     @Test
     void deveListarMovesetDaSpecies() {
-        SpeciesMoveRepositoryFake speciesMoveRepository = new SpeciesMoveRepositoryFake(new UnidadeTrabalhoFake());
-        ListarMovesetDaSpeciesHandler handler = new ListarMovesetDaSpeciesHandler(
+        SpeciesMoveRepositoryFake speciesMoveRepository = new SpeciesMoveRepositoryFake(new FakeUnitOfWork());
+        ListSpeciesMovesetHandler handler = new ListSpeciesMovesetHandler(
                 new SpeciesRepositoryFake(),
                 new MoveRepositoryFake(),
                 speciesMoveRepository
         );
 
-        List<MovesetSpeciesItem> itens = handler.handle(new ListarMovesetDaSpeciesQuery(1L));
+        List<SpeciesMovesetItem> itens = handler.handle(new ListSpeciesMovesetQuery(1L));
 
         assertThat(itens).hasSize(1);
         assertThat(itens.get(0).speciesMove().getSpeciesId()).isEqualTo(1L);
@@ -129,21 +129,21 @@ class SpeciesMoveUseCasesTest {
 
     @Test
     void deveListarSpeciesPorMove() {
-        SpeciesMoveRepositoryFake speciesMoveRepository = new SpeciesMoveRepositoryFake(new UnidadeTrabalhoFake());
-        ListarSpeciesPorMoveHandler handler = new ListarSpeciesPorMoveHandler(
+        SpeciesMoveRepositoryFake speciesMoveRepository = new SpeciesMoveRepositoryFake(new FakeUnitOfWork());
+        ListSpeciesByMoveHandler handler = new ListSpeciesByMoveHandler(
                 new SpeciesRepositoryFake(),
                 new MoveRepositoryFake(),
                 speciesMoveRepository
         );
 
-        List<SpeciesPorMoveItem> itens = handler.handle(new ListarSpeciesPorMoveQuery(2L));
+        List<SpeciesByMoveItem> itens = handler.handle(new ListSpeciesByMoveQuery(2L));
 
         assertThat(itens).hasSize(1);
         assertThat(itens.get(0).speciesMove().getMoveId()).isEqualTo(2L);
         assertThat(itens.get(0).species().getName()).isEqualTo("bulbasaur");
     }
 
-    private static class UnidadeTrabalhoFake implements UnidadeTrabalhoEventosDominio {
+    private static class FakeUnitOfWork implements DomainEventUnitOfWork {
 
         private IAggregate aggregateRegistrado;
         private Object aggregateIdRegistrado;
@@ -167,13 +167,13 @@ class SpeciesMoveUseCasesTest {
 
     private static class SpeciesMoveRepositoryFake implements SpeciesMoveRepository {
 
-        private final UnidadeTrabalhoEventosDominio unidadeTrabalho;
+        private final DomainEventUnitOfWork unidadeTrabalho;
         private SpeciesMove aggregateRecebido;
         private boolean duplicado;
         private boolean removeu;
         private final SpeciesMove existente = SpeciesMove.restaurar(10L, 1L, 2L, MoveLearnMethod.LEVEL_UP, 7, Instant.now(), Instant.now());
 
-        private SpeciesMoveRepositoryFake(UnidadeTrabalhoEventosDominio unidadeTrabalho) {
+        private SpeciesMoveRepositoryFake(DomainEventUnitOfWork unidadeTrabalho) {
             this.unidadeTrabalho = unidadeTrabalho;
         }
 
@@ -269,8 +269,8 @@ class SpeciesMoveUseCasesTest {
         }
 
         @Override
-        public ResultadoPaginado<Species> listar(int pagina, int tamanho) {
-            return new ResultadoPaginado<>(new ArrayList<>(), 0, 0, pagina, tamanho);
+        public PaginatedResult<Species> listar(int pagina, int tamanho) {
+            return new PaginatedResult<>(new ArrayList<>(), 0, 0, pagina, tamanho);
         }
 
         @Override
@@ -312,18 +312,18 @@ class SpeciesMoveUseCasesTest {
         }
 
         @Override
-        public ResultadoPaginado<Move> listar(int pagina, int tamanho) {
-            return new ResultadoPaginado<>(new ArrayList<>(), 0, 0, pagina, tamanho);
+        public PaginatedResult<Move> listar(int pagina, int tamanho) {
+            return new PaginatedResult<>(new ArrayList<>(), 0, 0, pagina, tamanho);
         }
 
         @Override
-        public ResultadoPaginado<Move> listarPorType(PokemonType type, int pagina, int tamanho) {
-            return new ResultadoPaginado<>(new ArrayList<>(), 0, 0, pagina, tamanho);
+        public PaginatedResult<Move> listarPorType(PokemonType type, int pagina, int tamanho) {
+            return new PaginatedResult<>(new ArrayList<>(), 0, 0, pagina, tamanho);
         }
 
         @Override
-        public ResultadoPaginado<Move> listarPorCategory(MoveCategory category, int pagina, int tamanho) {
-            return new ResultadoPaginado<>(new ArrayList<>(), 0, 0, pagina, tamanho);
+        public PaginatedResult<Move> listarPorCategory(MoveCategory category, int pagina, int tamanho) {
+            return new PaginatedResult<>(new ArrayList<>(), 0, 0, pagina, tamanho);
         }
 
         @Override

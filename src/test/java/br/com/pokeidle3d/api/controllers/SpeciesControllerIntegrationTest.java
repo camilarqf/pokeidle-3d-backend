@@ -54,7 +54,7 @@ class SpeciesControllerIntegrationTest {
         assertThat(id).isPositive();
         assertThat(eventJpaRepository.findAll())
                 .anySatisfy(evento -> {
-                    assertThat(evento.getFullName()).endsWith("SpeciesCriadaEvent");
+                    assertThat(evento.getFullName()).endsWith("SpeciesCreatedEvent");
                     assertThat(evento.getAggregateType()).isEqualTo("Species");
                     assertThat(evento.getPayload()).contains("integration-test-key");
                 });

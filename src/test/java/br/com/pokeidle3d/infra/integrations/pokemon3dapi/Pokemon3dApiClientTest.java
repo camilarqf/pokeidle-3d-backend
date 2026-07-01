@@ -61,7 +61,7 @@ class Pokemon3dApiClientTest {
                 .andRespond(withSuccess("{\"pokemon\":[]}", MediaType.APPLICATION_JSON));
 
         assertThatThrownBy(() -> client.buscarModeloRegular(999))
-                .isInstanceOf(Pokemon3dModeloNaoEncontradoException.class)
+                .isInstanceOf(Pokemon3dModelNotFoundException.class)
                 .hasMessageContaining("999");
         server.verify();
     }

@@ -46,7 +46,7 @@ public class OpenApiController {
                                 "Criar especie",
                                 "Cria uma especie Pokemon.",
                                 List.of(),
-                                ref("CriarSpeciesRequest"),
+                                ref("CreateSpeciesRequest"),
                                 created(ref("SpeciesResponse"))
                         )
                 ),
@@ -77,14 +77,14 @@ public class OpenApiController {
                                 "Retorna os movimentos associados a uma especie.",
                                 List.of(path("speciesId", "integer", "Id da especie.")),
                                 null,
-                                ok(arrayOf(ref("MovesetSpeciesResponse")))
+                                ok(arrayOf(ref("SpeciesMovesetResponse")))
                         ),
                         "post", operation(
                                 "Moveset",
                                 "Adicionar move ao moveset",
                                 "Associa um movimento ao moveset de uma especie.",
                                 List.of(path("speciesId", "integer", "Id da especie.")),
-                                ref("AdicionarMoveAoMovesetSpeciesRequest"),
+                                ref("AddMoveToSpeciesMovesetRequest"),
                                 created(ref("SpeciesMoveResponse"))
                         )
                 ),
@@ -117,7 +117,7 @@ public class OpenApiController {
                                 "Criar movimento",
                                 "Cria um movimento Pokemon.",
                                 List.of(),
-                                ref("CriarMoveRequest"),
+                                ref("CreateMoveRequest"),
                                 created(ref("MoveResponse"))
                         )
                 ),
@@ -148,7 +148,7 @@ public class OpenApiController {
                                 "Retorna as especies que aprendem um movimento.",
                                 List.of(path("moveId", "integer", "Id do movimento.")),
                                 null,
-                                ok(arrayOf(ref("SpeciesPorMoveResponse")))
+                                ok(arrayOf(ref("SpeciesByMoveResponse")))
                         )
                 )
         );
@@ -169,7 +169,7 @@ public class OpenApiController {
                         "PokemonType", stringEnum("NORMAL", "FIRE", "WATER", "ELECTRIC", "GRASS", "ICE", "FIGHTING", "POISON", "GROUND", "FLYING", "PSYCHIC", "BUG", "ROCK", "GHOST", "DRAGON", "DARK", "STEEL", "FAIRY"),
                         "MoveCategory", stringEnum("PHYSICAL", "SPECIAL", "STATUS"),
                         "MoveLearnMethod", stringEnum("LEVEL_UP", "TM", "HM", "TUTOR", "EGG", "EVENT"),
-                        "CriarSpeciesRequest", object(required("pokedexNumber", "name", "primaryType", "baseHp", "baseAttack", "baseDefense", "baseSpecialAttack", "baseSpecialDefense", "baseSpeed"), map(
+                        "CreateSpeciesRequest", object(required("pokedexNumber", "name", "primaryType", "baseHp", "baseAttack", "baseDefense", "baseSpecialAttack", "baseSpecialDefense", "baseSpeed"), map(
                                 "pokedexNumber", integer("int32", 1),
                                 "name", string(),
                                 "primaryType", ref("PokemonType"),
@@ -183,7 +183,7 @@ public class OpenApiController {
                                 "spriteRef", nullableString(),
                                 "model3dRef", nullableString()
                         )),
-                        "CriarMoveRequest", object(required("name", "type", "category", "pp"), map(
+                        "CreateMoveRequest", object(required("name", "type", "category", "pp"), map(
                                 "name", string(),
                                 "type", ref("PokemonType"),
                                 "power", nullableInteger("int32", 0),
@@ -191,7 +191,7 @@ public class OpenApiController {
                                 "category", ref("MoveCategory"),
                                 "pp", integer("int32", 1)
                         )),
-                        "AdicionarMoveAoMovesetSpeciesRequest", object(required("moveId", "learnMethod"), map(
+                        "AddMoveToSpeciesMovesetRequest", object(required("moveId", "learnMethod"), map(
                                 "moveId", integer("int64", 1),
                                 "learnMethod", ref("MoveLearnMethod"),
                                 "levelLearnedAt", nullableInteger("int32", 1)
@@ -233,7 +233,7 @@ public class OpenApiController {
                                 "createdAt", instant(),
                                 "updatedAt", instant()
                         )),
-                        "MovesetSpeciesResponse", object(List.of(), map(
+                        "SpeciesMovesetResponse", object(List.of(), map(
                                 "id", integer("int64", 1),
                                 "speciesId", integer("int64", 1),
                                 "move", ref("MoveResponse"),
@@ -242,7 +242,7 @@ public class OpenApiController {
                                 "createdAt", instant(),
                                 "updatedAt", instant()
                         )),
-                        "SpeciesPorMoveResponse", object(List.of(), map(
+                        "SpeciesByMoveResponse", object(List.of(), map(
                                 "id", integer("int64", 1),
                                 "moveId", integer("int64", 1),
                                 "species", ref("SpeciesResponse"),
@@ -251,7 +251,7 @@ public class OpenApiController {
                                 "createdAt", instant(),
                                 "updatedAt", instant()
                         )),
-                        "ErroResponse", object(List.of(), map(
+                        "ErrorResponse", object(List.of(), map(
                                 "timestamp", instant(),
                                 "status", integer("int32", 0),
                                 "error", string(),
@@ -283,9 +283,9 @@ public class OpenApiController {
     private Map<String, Object> responses(Map<String, Object> successResponse) {
         Map<String, Object> responses = map();
         responses.putAll(successResponse);
-        responses.put("400", jsonResponse("Requisicao invalida", ref("ErroResponse")));
-        responses.put("404", jsonResponse("Recurso nao encontrado", ref("ErroResponse")));
-        responses.put("409", jsonResponse("Conflito de dominio", ref("ErroResponse")));
+        responses.put("400", jsonResponse("Requisicao invalida", ref("ErrorResponse")));
+        responses.put("404", jsonResponse("Recurso nao encontrado", ref("ErrorResponse")));
+        responses.put("409", jsonResponse("Conflito de dominio", ref("ErrorResponse")));
         return responses;
     }
 

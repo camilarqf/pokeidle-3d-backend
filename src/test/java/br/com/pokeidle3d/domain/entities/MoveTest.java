@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.entities;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.MoveCategory;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import org.junit.jupiter.api.Test;
@@ -36,21 +36,21 @@ class MoveTest {
     @Test
     void naoDeveCriarMoveComPpMenorOuIgualAZero() {
         assertThatThrownBy(() -> Move.criar("tackle", PokemonType.NORMAL, 40, 100, MoveCategory.PHYSICAL, 0))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("PP");
     }
 
     @Test
     void naoDeveCriarMoveComPowerNegativo() {
         assertThatThrownBy(() -> Move.criar("tackle", PokemonType.NORMAL, -1, 100, MoveCategory.PHYSICAL, 35))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Power");
     }
 
     @Test
     void naoDeveCriarMoveComAccuracyForaDoIntervalo() {
         assertThatThrownBy(() -> Move.criar("tackle", PokemonType.NORMAL, 40, 101, MoveCategory.PHYSICAL, 35))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Accuracy");
     }
 }

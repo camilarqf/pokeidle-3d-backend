@@ -1,6 +1,6 @@
 package br.com.pokeidle3d.domain.services;
 
-import br.com.pokeidle3d.domain.exceptions.ValidacaoDominioException;
+import br.com.pokeidle3d.domain.exceptions.DomainValidationException;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
 import org.junit.jupiter.api.Test;
 
@@ -106,21 +106,21 @@ class TypeEffectivenessMatrixTest {
     @Test
     void deveLancarExcecaoQuandoTipoAtacanteDaEfetividadeForNulo() {
         assertThatThrownBy(() -> matrix.getEffectiveness(null, List.of(PokemonType.NORMAL)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipo atacante");
     }
 
     @Test
     void deveLancarExcecaoQuandoTiposDefensoresForemNulos() {
         assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL, null))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipos defensores");
     }
 
     @Test
     void deveLancarExcecaoQuandoTiposDefensoresEstiveremVazios() {
         assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL, List.of()))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("ao menos um tipo defensor");
     }
 
@@ -128,7 +128,7 @@ class TypeEffectivenessMatrixTest {
     void deveLancarExcecaoQuandoHouverMaisDeDoisTiposDefensores() {
         assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL,
                 List.of(PokemonType.NORMAL, PokemonType.FLYING, PokemonType.FAIRY)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("maximo dois tipos");
     }
 
@@ -136,7 +136,7 @@ class TypeEffectivenessMatrixTest {
     void deveLancarExcecaoQuandoHouverTipoDefensorNulo() {
         assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL,
                 Collections.singletonList(null)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("Tipo defensor");
     }
 
@@ -144,7 +144,7 @@ class TypeEffectivenessMatrixTest {
     void deveLancarExcecaoQuandoHouverTiposDefensoresDuplicados() {
         assertThatThrownBy(() -> matrix.getEffectiveness(PokemonType.NORMAL,
                 List.of(PokemonType.NORMAL, PokemonType.NORMAL)))
-                .isInstanceOf(ValidacaoDominioException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessageContaining("duplicados");
     }
 

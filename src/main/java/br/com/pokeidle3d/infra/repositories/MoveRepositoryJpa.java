@@ -1,11 +1,11 @@
 package br.com.pokeidle3d.infra.repositories;
 
 import br.com.pokeidle3d.domain.entities.Move;
-import br.com.pokeidle3d.domain.exceptions.MoveDuplicadoException;
+import br.com.pokeidle3d.domain.exceptions.DuplicateMoveException;
 import br.com.pokeidle3d.domain.repositories.MoveRepository;
 import br.com.pokeidle3d.domain.valueobjects.MoveCategory;
 import br.com.pokeidle3d.domain.valueobjects.PokemonType;
-import br.com.pokeidle3d.domain.valueobjects.ResultadoPaginado;
+import br.com.pokeidle3d.domain.valueobjects.PaginatedResult;
 import br.com.pokeidle3d.infra.mappers.MoveJpaMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -31,7 +31,7 @@ public class MoveRepositoryJpa implements MoveRepository {
         try {
             return mapper.paraDominio(repository.save(mapper.paraJpa(move)));
         } catch (DataIntegrityViolationException exception) {
-            throw new MoveDuplicadoException("Ja existe movimento com este nome");
+            throw new DuplicateMoveException("Ja existe movimento com este nome");
         }
     }
 
@@ -46,21 +46,21 @@ public class MoveRepositoryJpa implements MoveRepository {
     }
 
     @Override
-    public ResultadoPaginado<Move> listar(int pagina, int tamanho) {
+    public PaginatedResult<Move> listar(int pagina, int tamanho) {
         Page<Move> page = repository.findAll(pageRequest(pagina, tamanho)).map(mapper::paraDominio);
-        return paraResultadoPaginado(page);
+        return paraPaginatedResult(page);
     }
 
     @Override
-    public ResultadoPaginado<Move> listarPorType(PokemonType type, int pagina, int tamanho) {
+    public PaginatedResult<Move> listarPorType(PokemonType type, int pagina, int tamanho) {
         Page<Move> page = repository.findByType(type, pageRequest(pagina, tamanho)).map(mapper::paraDominio);
-        return paraResultadoPaginado(page);
+        return paraPaginatedResult(page);
     }
 
     @Override
-    public ResultadoPaginado<Move> listarPorCategory(MoveCategory category, int pagina, int tamanho) {
+    public PaginatedResult<Move> listarPorCategory(MoveCategory category, int pagina, int tamanho) {
         Page<Move> page = repository.findByCategory(category, pageRequest(pagina, tamanho)).map(mapper::paraDominio);
-        return paraResultadoPaginado(page);
+        return paraPaginatedResult(page);
     }
 
     @Override
@@ -72,8 +72,8 @@ public class MoveRepositoryJpa implements MoveRepository {
         return PageRequest.of(pagina, tamanho, Sort.by("name").ascending());
     }
 
-    private ResultadoPaginado<Move> paraResultadoPaginado(Page<Move> page) {
-        return new ResultadoPaginado<>(
+    private PaginatedResult<Move> paraPaginatedResult(Page<Move> page) {
+        return new PaginatedResult<>(
                 page.getContent(),
                 page.getTotalElements(),
                 page.getTotalPages(),
